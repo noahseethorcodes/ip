@@ -18,4 +18,6 @@ text-ui-test/EXPECTED-UNIX.TXT
 
 # JDK Version Control
 .java-version
+
 .vscode
+*.class
