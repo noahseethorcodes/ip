@@ -1,4 +1,6 @@
-public class Task {
+package tasks;
+
+public abstract class Task {
     protected String description;
     protected boolean isDone;
 
@@ -27,7 +29,5 @@ public class Task {
         return this.description;
     }
 
-    public String getAsListItem() {
-        return String.format("[%s] %s", this.getStatusIcon(), this.getDescription());
-    }
+    public abstract String getAsListItem();
 }

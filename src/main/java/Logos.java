@@ -1,10 +1,15 @@
 import java.util.Scanner;
 
+import tasks.Task;
+import tasks.Todo;
+import tasks.Deadline;
+import tasks.Event;
+
 public class Logos {
 
-    private static int IndentLength = 4;
-    private static int LineLength = 60;
-    private static String ChatbotName = "Logos";
+    private static int INDENT_LENGTH = 4;
+    private static int LINE_LENGTH = 80;
+    private static String CHATBOT_NAME = "Logos";
     private static Task[] tasks;
     private static int taskCount = 0;
 
@@ -20,13 +25,16 @@ public class Logos {
                 + "|_____\\___/ \\__, |\\___/|___/ \n"
                 + "            |___/            \n";
         System.out.println("Welcome to...\n" + logo);
-        Logos.respond("Hello! I'm " + Logos.ChatbotName + ":) Your friendly terminal task manager.\n",
-                "You may find the following commands helpful:",
-                "-> Type in the name of a task to add it to the task list",
-                "-> Use the command 'list' to view your current task list",
-                "-> Use the command 'mark' to mark a task as done!",
-                "-> Use the command 'unmark' to mark a task as not yet done!",
-                "-> Use the command 'bye' to when you're done!");
+        Logos.respond(
+                "Hello! I'm " + Logos.CHATBOT_NAME + " :) Your friendly terminal task manager.\n",
+                "Here are some commands you can try:",
+                "-> todo <description>                      : Add a simple task",
+                "-> deadline <desc> /by <time>              : Add a task with a deadline",
+                "-> event <desc> /from <start> /to <end>    : Add an event with a start and end time",
+                "-> list                                    : Show all tasks",
+                "-> mark <taskNumber>                       : Mark a task as done",
+                "-> unmark <taskNumber>                     : Mark a task as not done",
+                "-> bye                                     : Exit the program");
 
         // Input and Response
         Scanner sc = new Scanner(System.in);
@@ -67,8 +75,41 @@ public class Logos {
                         Logos.respond("Please specify a task number.");
                     }
                 }
+                case "todo" -> {
+                    Logos.addTodo(argument);
+                }
+                case "deadline" -> {
+                    int byPos = argument.toLowerCase().indexOf("/by");
+                    if (byPos < 0) {
+                        Logos.respond("Please use this format: deadline <desc> /by <when>");
+                    } else {
+                        String description = argument.substring(0, byPos).trim();
+                        String deadline = argument.substring(byPos + 3).trim(); // len("/by") = 3
+                        if (description.isEmpty() || deadline.isEmpty()) {
+                            Logos.respond("Please use this format: deadline <desc> /by <when>");
+                        } else {
+                            Logos.addDeadline(description, deadline);
+                        }
+                    }
+                }
+                case "event" -> {
+                    int fromPos = argument.indexOf("/from");
+                    int toPos = argument.indexOf("/to");
+                    if (fromPos < 0 || toPos < 0 || toPos <= fromPos) {
+                        Logos.respond("Please use this format: event <desc> /from <start> /to <end>");
+                    } else {
+                        String desc = argument.substring(0, fromPos).trim();
+                        String from = argument.substring(fromPos + 5, toPos).trim(); // 5 = len("/from")
+                        String to = argument.substring(toPos + 3).trim(); // 3 = len("/to")
+                        if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
+                            System.out.println("Usage: event <desc> /from <start> /to <end>");
+                        } else {
+                            Logos.addEvent(desc, from, to);
+                        }
+                    }
+                }
                 default -> {
-                    Logos.addTask(userInput);
+                    Logos.respond("Please input a valid command!");
                 }
             }
         }
@@ -80,8 +121,8 @@ public class Logos {
 
     // Helper Function that indents text and wraps with horizontal lines
     private static void respond(String... messages) {
-        String indent = " ".repeat(Logos.IndentLength);
-        String line = "-".repeat(Logos.LineLength);
+        String indent = " ".repeat(Logos.INDENT_LENGTH);
+        String line = "-".repeat(Logos.LINE_LENGTH);
         System.out.println(indent + line);
         for (String message : messages) {
             System.out.println(indent + message);
@@ -89,11 +130,37 @@ public class Logos {
         System.out.println(indent + line);
     }
 
-    private static void addTask(String taskName) {
-        Task newTask = new Task(taskName);
-        Logos.tasks[Logos.taskCount] = newTask;
+    private static void addTodo(String taskName) {
+        Todo newTodo = new Todo(taskName);
+        Logos.tasks[Logos.taskCount] = newTodo;
         Logos.taskCount++;
-        Logos.respond("Task added: \"" + newTask.getDescription() + "\"",
+        Logos.respond("Todo added: \"" + newTodo.getDescription() + "\"",
+                String.format("Now you have %d tasks in the list~", Logos.taskCount),
+                "Use the command 'list' to view your current task list");
+    }
+
+    private static void addDeadline(String taskName, String deadline) {
+        Deadline newDeadline = new Deadline(taskName, deadline);
+        Logos.tasks[Logos.taskCount] = newDeadline;
+        Logos.taskCount++;
+        Logos.respond(
+                String.format("Deadline added: \"%s\", (by: %s)",
+                        newDeadline.getDescription(),
+                        newDeadline.getDeadline()),
+                String.format("Now you have %d tasks in the list~", Logos.taskCount),
+                "Use the command 'list' to view your current task list");
+    }
+
+    private static void addEvent(String taskName, String startDateTime, String endDateTime) {
+        Event newEvent = new Event(taskName, startDateTime, endDateTime);
+        Logos.tasks[Logos.taskCount] = newEvent;
+        Logos.taskCount++;
+        Logos.respond(
+                String.format("Event added: \"%s\", (from: %s, to: %s)",
+                        newEvent.getDescription(),
+                        newEvent.getStartDateTime(),
+                        newEvent.getEndDateTime()),
+                String.format("Now you have %d tasks in the list~", Logos.taskCount),
                 "Use the command 'list' to view your current task list");
     }
 
@@ -103,8 +170,8 @@ public class Logos {
                     "Type in the name of a task to add it to the task list");
             return;
         }
-        String indent = " ".repeat(Logos.IndentLength);
-        String line = "-".repeat(Logos.LineLength);
+        String indent = " ".repeat(Logos.INDENT_LENGTH);
+        String line = "-".repeat(Logos.LINE_LENGTH);
         System.out.println(indent + line);
         System.out.println(indent + "Here's your current tasks, in order of when they were added:");
         for (int i = 0; i < Logos.taskCount; i++) {
