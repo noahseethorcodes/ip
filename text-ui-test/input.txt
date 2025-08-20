@@ -1,0 +1,9 @@
+todo Todo1
+list
+mark 1
+list
+deadline CS2103T Homework /by Wed 20 Aug
+list
+event CS2103T Tutorial /from Thurs 1pm /to Thurs 2pm
+list
+bye
