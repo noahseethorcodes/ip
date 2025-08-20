@@ -13,6 +13,11 @@ public class Deadline extends Task {
     }
 
     @Override
+    public TaskType getTaskType() {
+        return TaskType.DEADLINE;
+    }
+
+    @Override
     public String getAsListItem() {
         return String.format("[%s] %s (by: %s)",
                 this.getStatusIcon(),

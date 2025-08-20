@@ -11,6 +11,8 @@ import errors.UnknownCommandException;
 import errors.InvalidCommandFormatException;
 import errors.InvalidIndexException;
 
+import commands.Command;
+
 public class Logos {
 
     private static int INDENT_LENGTH = 4;
@@ -20,7 +22,7 @@ public class Logos {
 
     public static void main(String[] args) {
         // Initialise Tasks
-        tasks = new ArrayList<Task>();
+        Logos.tasks = new ArrayList<Task>();
 
         // Welcome!
         String logo = " _                           \n"
@@ -47,17 +49,18 @@ public class Logos {
         while (chatActive) {
             String userInput = sc.nextLine();
             String[] parts = userInput.split(" ", 2); // split into [command, argument]
-            String command = parts[0];
+            String commandKeyword = parts[0];
             String argument = parts.length > 1 ? parts[1] : null;
             try {
+                Command command = Command.fromString(commandKeyword);
                 switch (command) {
-                    case "bye" -> {
+                    case BYE -> {
                         chatActive = false;
                     }
-                    case "list" -> {
+                    case LIST -> {
                         Logos.listTasks();
                     }
-                    case "mark" -> {
+                    case MARK -> {
                         if (argument != null) {
                             try {
                                 int taskNumber = Integer.parseInt(argument);
@@ -66,10 +69,10 @@ public class Logos {
                                 Logos.respond("Invalid task number!");
                             }
                         } else {
-                            throw new InvalidCommandFormatException(command, "mark <taskNumber>");
+                            throw new InvalidCommandFormatException(command.getKeyword(), "mark <taskNumber>");
                         }
                     }
-                    case "unmark" -> {
+                    case UNMARK -> {
                         if (argument != null) {
                             try {
                                 int taskNumber = Integer.parseInt(argument);
@@ -78,44 +81,46 @@ public class Logos {
                                 Logos.respond("Invalid task number!");
                             }
                         } else {
-                            throw new InvalidCommandFormatException(command, "unmark <taskNumber>");
+                            throw new InvalidCommandFormatException(command.getKeyword(), "unmark <taskNumber>");
                         }
                     }
-                    case "todo" -> {
+                    case TODO -> {
                         Logos.addTodo(argument);
                     }
-                    case "deadline" -> {
+                    case DEADLINE -> {
                         int byPos = argument.toLowerCase().indexOf("/by");
                         if (byPos < 0) {
-                            throw new InvalidCommandFormatException(command, "deadline <desc> /by <when>");
+                            throw new InvalidCommandFormatException(command.getKeyword(), "deadline <desc> /by <when>");
                         } else {
                             String description = argument.substring(0, byPos).trim();
                             String deadline = argument.substring(byPos + 3).trim(); // len("/by") = 3
                             if (description.isEmpty() || deadline.isEmpty()) {
-                                throw new InvalidCommandFormatException(command, "deadline <desc> /by <when>");
+                                throw new InvalidCommandFormatException(command.getKeyword(),
+                                        "deadline <desc> /by <when>");
                             } else {
                                 Logos.addDeadline(description, deadline);
                             }
                         }
                     }
-                    case "event" -> {
+                    case EVENT -> {
                         int fromPos = argument.indexOf("/from");
                         int toPos = argument.indexOf("/to");
                         if (fromPos < 0 || toPos < 0 || toPos <= fromPos) {
-                            throw new InvalidCommandFormatException(command, "event <desc> /from <start> /to <end>");
+                            throw new InvalidCommandFormatException(command.getKeyword(),
+                                    "event <desc> /from <start> /to <end>");
                         } else {
                             String desc = argument.substring(0, fromPos).trim();
                             String from = argument.substring(fromPos + 5, toPos).trim(); // 5 = len("/from")
                             String to = argument.substring(toPos + 3).trim(); // 3 = len("/to")
                             if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
-                                throw new InvalidCommandFormatException(command,
+                                throw new InvalidCommandFormatException(command.getKeyword(),
                                         "event <desc> /from <start> /to <end>");
                             } else {
                                 Logos.addEvent(desc, from, to);
                             }
                         }
                     }
-                    case "delete" -> {
+                    case DELETE -> {
                         if (argument != null) {
                             try {
                                 int taskNumber = Integer.parseInt(argument);
@@ -124,11 +129,11 @@ public class Logos {
                                 Logos.respond("Invalid task number!");
                             }
                         } else {
-                            throw new InvalidCommandFormatException(command, "delete <taskNumber>");
+                            throw new InvalidCommandFormatException(command.getKeyword(), "delete <taskNumber>");
                         }
                     }
                     default -> {
-                        throw new UnknownCommandException(command);
+                        throw new UnknownCommandException(command.getKeyword());
                     }
                 }
             } catch (UnknownCommandException e) {

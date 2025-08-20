@@ -19,6 +19,11 @@ public class Event extends Task {
     }
 
     @Override
+    public TaskType getTaskType() {
+        return TaskType.EVENT;
+    }
+
+    @Override
     public String getAsListItem() {
         return String.format("[%s] %s (from: %s, to: %s)",
                 this.getStatusIcon(),

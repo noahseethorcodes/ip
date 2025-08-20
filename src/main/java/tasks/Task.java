@@ -29,5 +29,7 @@ public abstract class Task {
         return this.description;
     }
 
+    public abstract TaskType getTaskType();
+
     public abstract String getAsListItem();
 }
