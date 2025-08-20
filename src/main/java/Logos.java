@@ -5,6 +5,10 @@ import tasks.Todo;
 import tasks.Deadline;
 import tasks.Event;
 
+import errors.UnknownCommandException;
+import errors.InvalidCommandFormatException;
+import errors.InvalidIndexException;
+
 public class Logos {
 
     private static int INDENT_LENGTH = 4;
@@ -44,73 +48,82 @@ public class Logos {
             String[] parts = userInput.split(" ", 2); // split into [command, argument]
             String command = parts[0];
             String argument = parts.length > 1 ? parts[1] : null;
-            switch (command) {
-                case "bye" -> {
-                    chatActive = false;
-                }
-                case "list" -> {
-                    Logos.listTasks();
-                }
-                case "mark" -> {
-                    if (argument != null) {
-                        try {
-                            int taskNumber = Integer.parseInt(argument);
-                            Logos.markTaskAsDone(taskNumber);
-                        } catch (NumberFormatException e) {
-                            Logos.respond("Invalid task number!");
-                        }
-                    } else {
-                        Logos.respond("Please specify a task number.");
+            try {
+                switch (command) {
+                    case "bye" -> {
+                        chatActive = false;
                     }
-                }
-                case "unmark" -> {
-                    if (argument != null) {
-                        try {
-                            int taskNumber = Integer.parseInt(argument);
-                            Logos.markTaskAsNotDone(taskNumber);
-                        } catch (NumberFormatException e) {
-                            Logos.respond("Invalid task number!");
-                        }
-                    } else {
-                        Logos.respond("Please specify a task number.");
+                    case "list" -> {
+                        Logos.listTasks();
                     }
-                }
-                case "todo" -> {
-                    Logos.addTodo(argument);
-                }
-                case "deadline" -> {
-                    int byPos = argument.toLowerCase().indexOf("/by");
-                    if (byPos < 0) {
-                        Logos.respond("Please use this format: deadline <desc> /by <when>");
-                    } else {
-                        String description = argument.substring(0, byPos).trim();
-                        String deadline = argument.substring(byPos + 3).trim(); // len("/by") = 3
-                        if (description.isEmpty() || deadline.isEmpty()) {
-                            Logos.respond("Please use this format: deadline <desc> /by <when>");
+                    case "mark" -> {
+                        if (argument != null) {
+                            try {
+                                int taskNumber = Integer.parseInt(argument);
+                                Logos.markTaskAsDone(taskNumber);
+                            } catch (NumberFormatException e) {
+                                Logos.respond("Invalid task number!");
+                            }
                         } else {
-                            Logos.addDeadline(description, deadline);
+                            Logos.respond("Please specify a task number.");
                         }
                     }
-                }
-                case "event" -> {
-                    int fromPos = argument.indexOf("/from");
-                    int toPos = argument.indexOf("/to");
-                    if (fromPos < 0 || toPos < 0 || toPos <= fromPos) {
-                        Logos.respond("Please use this format: event <desc> /from <start> /to <end>");
-                    } else {
-                        String desc = argument.substring(0, fromPos).trim();
-                        String from = argument.substring(fromPos + 5, toPos).trim(); // 5 = len("/from")
-                        String to = argument.substring(toPos + 3).trim(); // 3 = len("/to")
-                        if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
-                            System.out.println("Usage: event <desc> /from <start> /to <end>");
+                    case "unmark" -> {
+                        if (argument != null) {
+                            try {
+                                int taskNumber = Integer.parseInt(argument);
+                                Logos.markTaskAsNotDone(taskNumber);
+                            } catch (NumberFormatException e) {
+                                Logos.respond("Invalid task number!");
+                            }
                         } else {
-                            Logos.addEvent(desc, from, to);
+                            Logos.respond("Please specify a task number.");
                         }
                     }
+                    case "todo" -> {
+                        Logos.addTodo(argument);
+                    }
+                    case "deadline" -> {
+                        int byPos = argument.toLowerCase().indexOf("/by");
+                        if (byPos < 0) {
+                            throw new InvalidCommandFormatException(command, "deadline <desc> /by <when>");
+                        } else {
+                            String description = argument.substring(0, byPos).trim();
+                            String deadline = argument.substring(byPos + 3).trim(); // len("/by") = 3
+                            if (description.isEmpty() || deadline.isEmpty()) {
+                                throw new InvalidCommandFormatException(command, "deadline <desc> /by <when>");
+                            } else {
+                                Logos.addDeadline(description, deadline);
+                            }
+                        }
+                    }
+                    case "event" -> {
+                        int fromPos = argument.indexOf("/from");
+                        int toPos = argument.indexOf("/to");
+                        if (fromPos < 0 || toPos < 0 || toPos <= fromPos) {
+                            throw new InvalidCommandFormatException(command, "event <desc> /from <start> /to <end>");
+                        } else {
+                            String desc = argument.substring(0, fromPos).trim();
+                            String from = argument.substring(fromPos + 5, toPos).trim(); // 5 = len("/from")
+                            String to = argument.substring(toPos + 3).trim(); // 3 = len("/to")
+                            if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
+                                throw new InvalidCommandFormatException(command,
+                                        "event <desc> /from <start> /to <end>");
+                            } else {
+                                Logos.addEvent(desc, from, to);
+                            }
+                        }
+                    }
+                    default -> {
+                        throw new UnknownCommandException(command);
+                    }
                 }
-                default -> {
-                    Logos.respond("Please input a valid command!");
-                }
+            } catch (UnknownCommandException e) {
+                Logos.respond(e.getMessage());
+            } catch (InvalidCommandFormatException e) {
+                Logos.respond(e.getMessage());
+            } catch (InvalidIndexException e) {
+                Logos.respond(e.getMessage());
             }
         }
 
@@ -180,13 +193,10 @@ public class Logos {
         System.out.println(indent + line);
     }
 
-    private static void markTaskAsDone(int taskIndex) {
+    private static void markTaskAsDone(int taskIndex) throws InvalidIndexException {
         Task selectedTask = Logos.tasks[taskIndex - 1]; // Adjust for 0-index array
         if (selectedTask == null) {
-            Logos.respond(
-                    String.format(
-                            "There is no Task %d. Did you mean to input another number?", taskIndex));
-            return;
+            throw new InvalidIndexException(taskIndex);
         }
 
         if (selectedTask.isDone()) {
@@ -198,13 +208,10 @@ public class Logos {
         Logos.respond("Nice! I've marked this task as done:", selectedTask.getAsListItem());
     }
 
-    private static void markTaskAsNotDone(int taskIndex) {
+    private static void markTaskAsNotDone(int taskIndex) throws InvalidIndexException {
         Task selectedTask = Logos.tasks[taskIndex - 1]; // Adjust for 0-index array
         if (selectedTask == null) {
-            Logos.respond(
-                    String.format(
-                            "There is no Task %d. Did you mean to input another number?", taskIndex));
-            return;
+            throw new InvalidIndexException(taskIndex);
         }
 
         if (!selectedTask.isDone()) {
