@@ -1,5 +1,7 @@
 package tasks;
 
+import errors.LogosException;
+
 public abstract class Task {
     protected String description;
     protected boolean isDone;
@@ -7,6 +9,18 @@ public abstract class Task {
     public Task(String description) {
         this.description = description;
         this.isDone = false;
+    }
+
+    public static Task fromStorageLine(String storageLine) throws LogosException {
+        // Check the first character of the line to get the task type
+        char taskType = storageLine.charAt(0);
+
+        return switch (taskType) {
+            case 'T' -> Todo.fromStorageLine(storageLine);
+            case 'D' -> Deadline.fromStorageLine(storageLine);
+            case 'E' -> Event.fromStorageLine(storageLine);
+            default  -> throw new LogosException("Unknown task type: " + taskType);
+        };
     }
 
     public void markAsDone() {
@@ -34,4 +48,6 @@ public abstract class Task {
     public abstract String getAsListItem();
 
     public abstract String getTaskTypeIcon();
+
+    public abstract String toStorageLine();
 }

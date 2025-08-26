@@ -1,5 +1,5 @@
 import java.util.Scanner;
-
+import java.io.IOException;
 import java.util.ArrayList;
 
 import tasks.Task;
@@ -8,6 +8,7 @@ import tasks.Deadline;
 import tasks.Event;
 
 import errors.UnknownCommandException;
+import localstorage.Storage;
 import errors.InvalidCommandFormatException;
 import errors.InvalidIndexException;
 
@@ -20,9 +21,14 @@ public class Logos {
     private static String CHATBOT_NAME = "Logos";
     private static ArrayList<Task> tasks;
 
+    private static String LOCAL_STORAGE_FILE_PATH = "./data/tasks.txt";
+    public static Storage storage;
+
     public static void main(String[] args) {
         // Initialise Tasks
+        Logos.storage = new Storage(LOCAL_STORAGE_FILE_PATH);
         Logos.tasks = new ArrayList<Task>();
+        Logos.storage.loadTasks(tasks);
 
         // Welcome!
         String logo = " _                           \n"
@@ -55,6 +61,7 @@ public class Logos {
                 Command command = Command.fromString(commandKeyword);
                 switch (command) {
                     case BYE -> {
+                        Logos.storage.saveTasks(tasks);
                         chatActive = false;
                     }
                     case LIST -> {
@@ -142,6 +149,8 @@ public class Logos {
                 Logos.respond(e.getMessage());
             } catch (InvalidIndexException e) {
                 Logos.respond(e.getMessage());
+            } catch (IOException e) {
+                Logos.respond("Error handling local storage: " + e.getMessage());
             }
         }
 
@@ -161,15 +170,16 @@ public class Logos {
         System.out.println(indent + line);
     }
 
-    private static void addTodo(String taskName) {
+    private static void addTodo(String taskName) throws IOException{
         Todo newTodo = new Todo(taskName);
         Logos.tasks.add(newTodo);
         Logos.respond("Todo added: \"" + newTodo.getDescription() + "\"",
                 String.format("Now you have %d tasks in the list~", Logos.tasks.size()),
                 "Use the command 'list' to view your current task list");
+        Logos.storage.saveTasks(tasks);
     }
 
-    private static void addDeadline(String taskName, String deadline) {
+    private static void addDeadline(String taskName, String deadline) throws IOException {
         Deadline newDeadline = new Deadline(taskName, deadline);
         Logos.tasks.add(newDeadline);
         Logos.respond(
@@ -178,9 +188,10 @@ public class Logos {
                         newDeadline.getDeadline()),
                 String.format("Now you have %d tasks in the list~", Logos.tasks.size()),
                 "Use the command 'list' to view your current task list");
+        Logos.storage.saveTasks(tasks);
     }
 
-    private static void addEvent(String taskName, String startDateTime, String endDateTime) {
+    private static void addEvent(String taskName, String startDateTime, String endDateTime) throws IOException {
         Event newEvent = new Event(taskName, startDateTime, endDateTime);
         Logos.tasks.add(newEvent);
         Logos.respond(
@@ -190,6 +201,7 @@ public class Logos {
                         newEvent.getEndDateTime()),
                 String.format("Now you have %d tasks in the list~", Logos.tasks.size()),
                 "Use the command 'list' to view your current task list");
+        Logos.storage.saveTasks(tasks);
     }
 
     private static void listTasks() {
@@ -209,7 +221,7 @@ public class Logos {
         System.out.println(indent + line);
     }
 
-    private static void markTaskAsDone(int taskIndex) throws InvalidIndexException {
+    private static void markTaskAsDone(int taskIndex) throws InvalidIndexException, IOException {
         if (taskIndex > Logos.tasks.size() | taskIndex <= 0) {
             throw new InvalidIndexException(taskIndex);
         }
@@ -222,9 +234,10 @@ public class Logos {
 
         selectedTask.markAsDone();
         Logos.respond("Nice! I've marked this task as done:", selectedTask.getAsListItem());
+        Logos.storage.saveTasks(tasks);
     }
 
-    private static void markTaskAsNotDone(int taskIndex) throws InvalidIndexException {
+    private static void markTaskAsNotDone(int taskIndex) throws InvalidIndexException, IOException {
         if (taskIndex > Logos.tasks.size() | taskIndex <= 0) {
             throw new InvalidIndexException(taskIndex);
         }
@@ -237,9 +250,10 @@ public class Logos {
 
         selectedTask.markAsNotDone();
         Logos.respond("Alright! I've marked this task as not done yet:", selectedTask.getAsListItem());
+        Logos.storage.saveTasks(tasks);
     }
 
-    private static void deleteTask(int taskIndex) throws InvalidIndexException {
+    private static void deleteTask(int taskIndex) throws InvalidIndexException, IOException {
         if (taskIndex > Logos.tasks.size() | taskIndex <= 0) {
             throw new InvalidIndexException(taskIndex);
         }
@@ -248,5 +262,6 @@ public class Logos {
         Logos.respond("Todo removed: \"" + selectedTask.getDescription() + "\"",
                 String.format("Now you have %d tasks in the list~", Logos.tasks.size()),
                 "Use the command 'list' to view your current task list");
+        Logos.storage.saveTasks(tasks);
     }
 }

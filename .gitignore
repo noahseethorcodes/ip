@@ -21,3 +21,5 @@ text-ui-test/EXPECTED-UNIX.TXT
 
 .vscode
 *.class
+
+tasks.txt
