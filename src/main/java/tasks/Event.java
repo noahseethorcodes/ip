@@ -1,21 +1,25 @@
 package tasks;
 
-public class Event extends Task {
-    private String startDateTime;
-    private String endDateTime;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-    public Event(String description, String startDateTime, String endDateTime) {
+public class Event extends Task {
+    private LocalDateTime startDateTime;
+    private LocalDateTime endDateTime;
+    private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("MMM dd yyyy, h:mma");
+
+    public Event(String description, LocalDateTime startDateTime, LocalDateTime endDateTime) {
         super(description);
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
     }
 
     public String getStartDateTime() {
-        return this.startDateTime;
+        return this.startDateTime.format(DISPLAY_FORMAT);
     }
 
     public String getEndDateTime() {
-        return this.endDateTime;
+        return this.endDateTime.format(DISPLAY_FORMAT);
     }
 
     @Override
@@ -51,8 +55,8 @@ public class Event extends Task {
         }
         
         String description = parts[2];
-        String startDateTime = parts[3];
-        String endDateTime = parts[4];
+        LocalDateTime startDateTime = LocalDateTime.parse(parts[3]);
+        LocalDateTime endDateTime = LocalDateTime.parse(parts[4]);
 
         // Create Event Object
         Event event = new Event(description, startDateTime, endDateTime);
@@ -69,7 +73,7 @@ public class Event extends Task {
                 this.getTaskTypeIcon(),
                 this.isDone ? 1 : 0, 
                 this.getDescription(),
-                this.getStartDateTime(),
-                this.getEndDateTime());
+                this.startDateTime.toString(),
+                this.endDateTime.toString());
     }
 }

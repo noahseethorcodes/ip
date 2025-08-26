@@ -1,15 +1,19 @@
 package tasks;
 
-public class Deadline extends Task {
-    private String deadline;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-    public Deadline(String description, String deadline) {
+public class Deadline extends Task {
+    private LocalDateTime deadline;
+    private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("MMM dd yyyy, h:mma");
+
+    public Deadline(String description, LocalDateTime deadline) {
         super(description);
         this.deadline = deadline;
     }
 
     public String getDeadline() {
-        return this.deadline;
+        return this.deadline.format(DISPLAY_FORMAT);
     }
 
     @Override
@@ -44,7 +48,7 @@ public class Deadline extends Task {
         }
         
         String description = parts[2];
-        String by = parts[3];
+        LocalDateTime by = LocalDateTime.parse(parts[3]);
 
         // Create Deadline Object
         Deadline deadline = new Deadline(description, by);
@@ -61,6 +65,6 @@ public class Deadline extends Task {
                 this.getTaskTypeIcon(),
                 this.isDone ? 1 : 0, 
                 this.getDescription(),
-                this.getDeadline());
+                this.deadline.toString());
     }
 }
