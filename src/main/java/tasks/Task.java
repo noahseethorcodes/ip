@@ -32,4 +32,6 @@ public abstract class Task {
     public abstract TaskType getTaskType();
 
     public abstract String getAsListItem();
+
+    public abstract String getTaskTypeIcon();
 }

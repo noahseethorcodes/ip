@@ -25,10 +25,16 @@ public class Event extends Task {
 
     @Override
     public String getAsListItem() {
-        return String.format("[%s] %s (from: %s, to: %s)",
+        return String.format("[%s] [%s] %s (from: %s, to: %s)",
+                this.getTaskTypeIcon(),
                 this.getStatusIcon(),
                 this.getDescription(),
                 this.getStartDateTime(),
                 this.getEndDateTime());
+    }
+
+    @Override
+    public String getTaskTypeIcon() {
+        return "E";
     }
 }

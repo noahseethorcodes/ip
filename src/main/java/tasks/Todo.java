@@ -12,6 +12,14 @@ public class Todo extends Task {
 
     @Override
     public String getAsListItem() {
-        return String.format("[%s] %s", this.getStatusIcon(), this.getDescription());
+        return String.format("[%s] [%s] %s",
+                this.getTaskTypeIcon(),
+                this.getStatusIcon(), 
+                this.getDescription());
+    }
+
+    @Override
+    public String getTaskTypeIcon() {
+        return "T";
     }
 }
