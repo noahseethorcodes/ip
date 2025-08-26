@@ -2,9 +2,9 @@ todo Todo1
 list
 mark 1
 list
-deadline CS2103T Homework /by Wed 20 Aug
+deadline CS2103T Homework /by 2025-08-20 2359
 list
-event CS2103T Tutorial /from Thurs 1pm /to Thurs 2pm
+event CS2103T Tutorial /from 2025-08-21 1300 /to 2025-08-21 1400
 list
 todo Todo2
 todo Todo3

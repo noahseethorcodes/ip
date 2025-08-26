@@ -1,6 +1,9 @@
 import java.util.Scanner;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import tasks.Task;
 import tasks.Todo;
@@ -11,7 +14,6 @@ import errors.UnknownCommandException;
 import localstorage.Storage;
 import errors.InvalidCommandFormatException;
 import errors.InvalidIndexException;
-
 import commands.Command;
 
 public class Logos {
@@ -23,6 +25,8 @@ public class Logos {
 
     private static String LOCAL_STORAGE_FILE_PATH = "./data/tasks.txt";
     public static Storage storage;
+
+    private static final DateTimeFormatter INPUT_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
 
     public static void main(String[] args) {
         // Initialise Tasks
@@ -42,8 +46,8 @@ public class Logos {
                 "Hello! I'm " + Logos.CHATBOT_NAME + " :) Your friendly terminal task manager.\n",
                 "Here are some commands you can try:",
                 "-> todo <description>                      : Add a simple task",
-                "-> deadline <desc> /by <time>              : Add a task with a deadline",
-                "-> event <desc> /from <start> /to <end>    : Add an event with a start and end time",
+                "-> deadline <desc> /by <time>              : Add a task with a deadline (<yyyy-MM-dd HHmm>)",
+                "-> event <desc> /from <start> /to <end>    : Add an event with a start and end time (<yyyy-MM-dd HHmm>)",
                 "-> list                                    : Show all tasks",
                 "-> mark <taskNumber>                       : Mark a task as done",
                 "-> unmark <taskNumber>                     : Mark a task as not done",
@@ -97,16 +101,30 @@ public class Logos {
                     case DEADLINE -> {
                         int byPos = argument.toLowerCase().indexOf("/by");
                         if (byPos < 0) {
-                            throw new InvalidCommandFormatException(command.getKeyword(), "deadline <desc> /by <when>");
+                            throw new InvalidCommandFormatException(
+                                    command.getKeyword(), 
+                                    "deadline <desc> /by <yyyy-MM-dd HHmm>"
+                            );
+                        } 
+
+                        String description = argument.substring(0, byPos).trim();
+                        String by = argument.substring(byPos + 3).trim(); // len("/by") = 3
+
+                        LocalDateTime deadline;
+                        try {
+                            deadline = LocalDateTime.parse(by, INPUT_FORMAT);
+                        } catch (DateTimeParseException e) {
+                            throw new InvalidCommandFormatException(
+                                    command.getKeyword(), 
+                                    "Date should be in yyyy-MM-dd HHmm format, e.g., 2019-12-02 1800"
+                            );
+                        }
+
+                        if (description.isEmpty()) {
+                            throw new InvalidCommandFormatException(command.getKeyword(),
+                                    "deadline <desc> /by <yyyy-MM-dd HHmm>");
                         } else {
-                            String description = argument.substring(0, byPos).trim();
-                            String deadline = argument.substring(byPos + 3).trim(); // len("/by") = 3
-                            if (description.isEmpty() || deadline.isEmpty()) {
-                                throw new InvalidCommandFormatException(command.getKeyword(),
-                                        "deadline <desc> /by <when>");
-                            } else {
-                                Logos.addDeadline(description, deadline);
-                            }
+                            Logos.addDeadline(description, deadline);
                         }
                     }
                     case EVENT -> {
@@ -115,16 +133,29 @@ public class Logos {
                         if (fromPos < 0 || toPos < 0 || toPos <= fromPos) {
                             throw new InvalidCommandFormatException(command.getKeyword(),
                                     "event <desc> /from <start> /to <end>");
+                        } 
+
+                        String desc = argument.substring(0, fromPos).trim();
+                        String from = argument.substring(fromPos + 5, toPos).trim(); // 5 = len("/from")
+                        String to = argument.substring(toPos + 3).trim(); // 3 = len("/to")
+
+                        LocalDateTime startDateTime;
+                        LocalDateTime endDateTime;
+                        try {
+                            startDateTime = LocalDateTime.parse(from, INPUT_FORMAT);
+                            endDateTime = LocalDateTime.parse(to, INPUT_FORMAT);
+                        } catch (DateTimeParseException e) {
+                            throw new InvalidCommandFormatException(
+                                    command.getKeyword(), 
+                                    "Date should be in yyyy-MM-dd HHmm format, e.g., 2019-12-02 1800"
+                            );
+                        }
+
+                        if (desc.isEmpty()) {
+                            throw new InvalidCommandFormatException(command.getKeyword(),
+                                    "event <desc> /from <start> /to <end>");
                         } else {
-                            String desc = argument.substring(0, fromPos).trim();
-                            String from = argument.substring(fromPos + 5, toPos).trim(); // 5 = len("/from")
-                            String to = argument.substring(toPos + 3).trim(); // 3 = len("/to")
-                            if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
-                                throw new InvalidCommandFormatException(command.getKeyword(),
-                                        "event <desc> /from <start> /to <end>");
-                            } else {
-                                Logos.addEvent(desc, from, to);
-                            }
+                            Logos.addEvent(desc, startDateTime, endDateTime);
                         }
                     }
                     case DELETE -> {
@@ -179,7 +210,7 @@ public class Logos {
         Logos.storage.saveTasks(tasks);
     }
 
-    private static void addDeadline(String taskName, String deadline) throws IOException {
+    private static void addDeadline(String taskName, LocalDateTime deadline) throws IOException {
         Deadline newDeadline = new Deadline(taskName, deadline);
         Logos.tasks.add(newDeadline);
         Logos.respond(
@@ -191,7 +222,7 @@ public class Logos {
         Logos.storage.saveTasks(tasks);
     }
 
-    private static void addEvent(String taskName, String startDateTime, String endDateTime) throws IOException {
+    private static void addEvent(String taskName, LocalDateTime startDateTime, LocalDateTime endDateTime) throws IOException {
         Event newEvent = new Event(taskName, startDateTime, endDateTime);
         Logos.tasks.add(newEvent);
         Logos.respond(
