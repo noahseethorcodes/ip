@@ -1,4 +1,3 @@
-import java.util.Scanner;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
@@ -10,6 +9,8 @@ import tasks.Todo;
 import tasks.Deadline;
 import tasks.Event;
 
+import ui.Ui;
+
 import errors.UnknownCommandException;
 import localstorage.Storage;
 import errors.InvalidCommandFormatException;
@@ -20,7 +21,6 @@ public class Logos {
 
     private static int INDENT_LENGTH = 4;
     private static int LINE_LENGTH = 80;
-    private static String CHATBOT_NAME = "Logos";
     private static ArrayList<Task> tasks;
 
     private static String LOCAL_STORAGE_FILE_PATH = "./data/tasks.txt";
@@ -34,6 +34,9 @@ public class Logos {
         Logos.tasks = new ArrayList<Task>();
         Logos.storage.loadTasks(tasks);
 
+        // Initialise Ui
+        Ui ui = new Ui();
+
         // Welcome!
         String logo = " _                           \n"
                 + "| |    ___   __ _  ___  ___  \n"
@@ -41,23 +44,12 @@ public class Logos {
                 + "| |__| (_) | (_| | (_) \\__ \\ \n"
                 + "|_____\\___/ \\__, |\\___/|___/ \n"
                 + "            |___/            \n";
-        System.out.println("Welcome to...\n" + logo);
-        Logos.respond(
-                "Hello! I'm " + Logos.CHATBOT_NAME + " :) Your friendly terminal task manager.\n",
-                "Here are some commands you can try:",
-                "-> todo <description>                      : Add a simple task",
-                "-> deadline <desc> /by <time>              : Add a task with a deadline (<yyyy-MM-dd HHmm>)",
-                "-> event <desc> /from <start> /to <end>    : Add an event with a start and end time (<yyyy-MM-dd HHmm>)",
-                "-> list                                    : Show all tasks",
-                "-> mark <taskNumber>                       : Mark a task as done",
-                "-> unmark <taskNumber>                     : Mark a task as not done",
-                "-> bye                                     : Exit the program");
+        ui.showWelcome(logo, "Logos");
 
         // Input and Response
-        Scanner sc = new Scanner(System.in);
         Boolean chatActive = true;
         while (chatActive) {
-            String userInput = sc.nextLine();
+            String userInput = ui.readLine();
             String[] parts = userInput.split(" ", 2); // split into [command, argument]
             String commandKeyword = parts[0];
             String argument = parts.length > 1 ? parts[1] : null;
@@ -69,15 +61,15 @@ public class Logos {
                         chatActive = false;
                     }
                     case LIST -> {
-                        Logos.listTasks();
+                        Logos.listTasks(ui);
                     }
                     case MARK -> {
                         if (argument != null) {
                             try {
                                 int taskNumber = Integer.parseInt(argument);
-                                Logos.markTaskAsDone(taskNumber);
+                                Logos.markTaskAsDone(ui, taskNumber);
                             } catch (NumberFormatException e) {
-                                Logos.respond("Invalid task number!");
+                                ui.respond("Invalid task number!");
                             }
                         } else {
                             throw new InvalidCommandFormatException(command.getKeyword(), "mark <taskNumber>");
@@ -87,16 +79,16 @@ public class Logos {
                         if (argument != null) {
                             try {
                                 int taskNumber = Integer.parseInt(argument);
-                                Logos.markTaskAsNotDone(taskNumber);
+                                Logos.markTaskAsNotDone(ui, taskNumber);
                             } catch (NumberFormatException e) {
-                                Logos.respond("Invalid task number!");
+                                ui.respond("Invalid task number!");
                             }
                         } else {
                             throw new InvalidCommandFormatException(command.getKeyword(), "unmark <taskNumber>");
                         }
                     }
                     case TODO -> {
-                        Logos.addTodo(argument);
+                        Logos.addTodo(ui, argument);
                     }
                     case DEADLINE -> {
                         int byPos = argument.toLowerCase().indexOf("/by");
@@ -124,7 +116,7 @@ public class Logos {
                             throw new InvalidCommandFormatException(command.getKeyword(),
                                     "deadline <desc> /by <yyyy-MM-dd HHmm>");
                         } else {
-                            Logos.addDeadline(description, deadline);
+                            Logos.addDeadline(ui, description, deadline);
                         }
                     }
                     case EVENT -> {
@@ -155,16 +147,16 @@ public class Logos {
                             throw new InvalidCommandFormatException(command.getKeyword(),
                                     "event <desc> /from <start> /to <end>");
                         } else {
-                            Logos.addEvent(desc, startDateTime, endDateTime);
+                            Logos.addEvent(ui, desc, startDateTime, endDateTime);
                         }
                     }
                     case DELETE -> {
                         if (argument != null) {
                             try {
                                 int taskNumber = Integer.parseInt(argument);
-                                Logos.deleteTask(taskNumber);
+                                Logos.deleteTask(ui, taskNumber);
                             } catch (NumberFormatException e) {
-                                Logos.respond("Invalid task number!");
+                                ui.respond("Invalid task number!");
                             }
                         } else {
                             throw new InvalidCommandFormatException(command.getKeyword(), "delete <taskNumber>");
@@ -175,45 +167,33 @@ public class Logos {
                     }
                 }
             } catch (UnknownCommandException e) {
-                Logos.respond(e.getMessage());
+                ui.respond(e.getMessage());
             } catch (InvalidCommandFormatException e) {
-                Logos.respond(e.getMessage());
+                ui.respond(e.getMessage());
             } catch (InvalidIndexException e) {
-                Logos.respond(e.getMessage());
+                ui.respond(e.getMessage());
             } catch (IOException e) {
-                Logos.respond("Error handling local storage: " + e.getMessage());
+                ui.respond("Error handling local storage: " + e.getMessage());
             }
         }
 
         // Exit message on 'bye' command.
-        Logos.respond("Bye. Hope to see you again soon!");
-        sc.close();
+        ui.showExit();
     }
 
-    // Helper Function that indents text and wraps with horizontal lines
-    private static void respond(String... messages) {
-        String indent = " ".repeat(Logos.INDENT_LENGTH);
-        String line = "-".repeat(Logos.LINE_LENGTH);
-        System.out.println(indent + line);
-        for (String message : messages) {
-            System.out.println(indent + message);
-        }
-        System.out.println(indent + line);
-    }
-
-    private static void addTodo(String taskName) throws IOException{
+    private static void addTodo(Ui ui, String taskName) throws IOException{
         Todo newTodo = new Todo(taskName);
         Logos.tasks.add(newTodo);
-        Logos.respond("Todo added: \"" + newTodo.getDescription() + "\"",
+        ui.respond("Todo added: \"" + newTodo.getDescription() + "\"",
                 String.format("Now you have %d tasks in the list~", Logos.tasks.size()),
                 "Use the command 'list' to view your current task list");
         Logos.storage.saveTasks(tasks);
     }
 
-    private static void addDeadline(String taskName, LocalDateTime deadline) throws IOException {
+    private static void addDeadline(Ui ui, String taskName, LocalDateTime deadline) throws IOException {
         Deadline newDeadline = new Deadline(taskName, deadline);
         Logos.tasks.add(newDeadline);
-        Logos.respond(
+        ui.respond(
                 String.format("Deadline added: \"%s\", (by: %s)",
                         newDeadline.getDescription(),
                         newDeadline.getDeadline()),
@@ -222,10 +202,10 @@ public class Logos {
         Logos.storage.saveTasks(tasks);
     }
 
-    private static void addEvent(String taskName, LocalDateTime startDateTime, LocalDateTime endDateTime) throws IOException {
+    private static void addEvent(Ui ui, String taskName, LocalDateTime startDateTime, LocalDateTime endDateTime) throws IOException {
         Event newEvent = new Event(taskName, startDateTime, endDateTime);
         Logos.tasks.add(newEvent);
-        Logos.respond(
+        ui.respond(
                 String.format("Event added: \"%s\", (from: %s, to: %s)",
                         newEvent.getDescription(),
                         newEvent.getStartDateTime(),
@@ -235,9 +215,9 @@ public class Logos {
         Logos.storage.saveTasks(tasks);
     }
 
-    private static void listTasks() {
+    private static void listTasks(Ui ui) {
         if (Logos.tasks.isEmpty()) {
-            Logos.respond("There are no tasks in your task list currently.",
+            ui.respond("There are no tasks in your task list currently.",
                     "Type in the name of a task to add it to the task list");
             return;
         }
@@ -252,45 +232,45 @@ public class Logos {
         System.out.println(indent + line);
     }
 
-    private static void markTaskAsDone(int taskIndex) throws InvalidIndexException, IOException {
+    private static void markTaskAsDone(Ui ui, int taskIndex) throws InvalidIndexException, IOException {
         if (taskIndex > Logos.tasks.size() | taskIndex <= 0) {
             throw new InvalidIndexException(taskIndex);
         }
         Task selectedTask = Logos.tasks.get(taskIndex - 1);
 
         if (selectedTask.isDone()) {
-            Logos.respond("This task is already marked as done!", selectedTask.getAsListItem());
+            ui.respond("This task is already marked as done!", selectedTask.getAsListItem());
             return;
         }
 
         selectedTask.markAsDone();
-        Logos.respond("Nice! I've marked this task as done:", selectedTask.getAsListItem());
+        ui.respond("Nice! I've marked this task as done:", selectedTask.getAsListItem());
         Logos.storage.saveTasks(tasks);
     }
 
-    private static void markTaskAsNotDone(int taskIndex) throws InvalidIndexException, IOException {
+    private static void markTaskAsNotDone(Ui ui, int taskIndex) throws InvalidIndexException, IOException {
         if (taskIndex > Logos.tasks.size() | taskIndex <= 0) {
             throw new InvalidIndexException(taskIndex);
         }
         Task selectedTask = Logos.tasks.get(taskIndex - 1);
 
         if (!selectedTask.isDone()) {
-            Logos.respond("This task is already marked as not done!", selectedTask.getAsListItem());
+            ui.respond("This task is already marked as not done!", selectedTask.getAsListItem());
             return;
         }
 
         selectedTask.markAsNotDone();
-        Logos.respond("Alright! I've marked this task as not done yet:", selectedTask.getAsListItem());
+        ui.respond("Alright! I've marked this task as not done yet:", selectedTask.getAsListItem());
         Logos.storage.saveTasks(tasks);
     }
 
-    private static void deleteTask(int taskIndex) throws InvalidIndexException, IOException {
+    private static void deleteTask(Ui ui, int taskIndex) throws InvalidIndexException, IOException {
         if (taskIndex > Logos.tasks.size() | taskIndex <= 0) {
             throw new InvalidIndexException(taskIndex);
         }
         Task selectedTask = Logos.tasks.get(taskIndex - 1);
         Logos.tasks.remove(taskIndex - 1);
-        Logos.respond("Todo removed: \"" + selectedTask.getDescription() + "\"",
+        ui.respond("Todo removed: \"" + selectedTask.getDescription() + "\"",
                 String.format("Now you have %d tasks in the list~", Logos.tasks.size()),
                 "Use the command 'list' to view your current task list");
         Logos.storage.saveTasks(tasks);
