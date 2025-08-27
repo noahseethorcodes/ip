@@ -1,5 +1,5 @@
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -13,15 +13,13 @@ import ui.Ui;
 
 import errors.UnknownCommandException;
 import localstorage.Storage;
+import tasklist.TaskList;
 import errors.InvalidCommandFormatException;
 import errors.InvalidIndexException;
-import commands.Command;
+import commands.CommandType;
 
 public class Logos {
-
-    private static int INDENT_LENGTH = 4;
-    private static int LINE_LENGTH = 80;
-    private static ArrayList<Task> tasks;
+    private static TaskList taskList;
 
     private static String LOCAL_STORAGE_FILE_PATH = "./data/tasks.txt";
     public static Storage storage;
@@ -31,8 +29,8 @@ public class Logos {
     public static void main(String[] args) {
         // Initialise Tasks
         Logos.storage = new Storage(LOCAL_STORAGE_FILE_PATH);
-        Logos.tasks = new ArrayList<Task>();
-        Logos.storage.loadTasks(tasks);
+        Logos.taskList = new TaskList(storage);
+        Logos.taskList.loadFromStorgae();
 
         // Initialise Ui
         Ui ui = new Ui();
@@ -54,10 +52,9 @@ public class Logos {
             String commandKeyword = parts[0];
             String argument = parts.length > 1 ? parts[1] : null;
             try {
-                Command command = Command.fromString(commandKeyword);
+                CommandType command = CommandType.fromString(commandKeyword);
                 switch (command) {
                     case BYE -> {
-                        Logos.storage.saveTasks(tasks);
                         chatActive = false;
                     }
                     case LIST -> {
@@ -182,97 +179,57 @@ public class Logos {
     }
 
     private static void addTodo(Ui ui, String taskName) throws IOException{
-        Todo newTodo = new Todo(taskName);
-        Logos.tasks.add(newTodo);
+        Todo newTodo = Logos.taskList.addTodo(taskName);
         ui.respond("Todo added: \"" + newTodo.getDescription() + "\"",
-                String.format("Now you have %d tasks in the list~", Logos.tasks.size()),
+                String.format("Now you have %d tasks in the list~", Logos.taskList.size()),
                 "Use the command 'list' to view your current task list");
-        Logos.storage.saveTasks(tasks);
     }
 
     private static void addDeadline(Ui ui, String taskName, LocalDateTime deadline) throws IOException {
-        Deadline newDeadline = new Deadline(taskName, deadline);
-        Logos.tasks.add(newDeadline);
+        Deadline newDeadline = Logos.taskList.addDeadline(taskName, deadline);
         ui.respond(
                 String.format("Deadline added: \"%s\", (by: %s)",
                         newDeadline.getDescription(),
                         newDeadline.getDeadline()),
-                String.format("Now you have %d tasks in the list~", Logos.tasks.size()),
+                String.format("Now you have %d tasks in the list~", Logos.taskList.size()),
                 "Use the command 'list' to view your current task list");
-        Logos.storage.saveTasks(tasks);
     }
 
     private static void addEvent(Ui ui, String taskName, LocalDateTime startDateTime, LocalDateTime endDateTime) throws IOException {
-        Event newEvent = new Event(taskName, startDateTime, endDateTime);
-        Logos.tasks.add(newEvent);
+        Event newEvent = Logos.taskList.addEvent(taskName, startDateTime, endDateTime);
         ui.respond(
                 String.format("Event added: \"%s\", (from: %s, to: %s)",
                         newEvent.getDescription(),
                         newEvent.getStartDateTime(),
                         newEvent.getEndDateTime()),
-                String.format("Now you have %d tasks in the list~", Logos.tasks.size()),
+                String.format("Now you have %d tasks in the list~", Logos.taskList.size()),
                 "Use the command 'list' to view your current task list");
-        Logos.storage.saveTasks(tasks);
     }
 
     private static void listTasks(Ui ui) {
-        if (Logos.tasks.isEmpty()) {
+        List<String> list = Logos.taskList.listTasks();
+        if (list.isEmpty()) {
             ui.respond("There are no tasks in your task list currently.",
                     "Type in the name of a task to add it to the task list");
             return;
         }
-        String indent = " ".repeat(Logos.INDENT_LENGTH);
-        String line = "-".repeat(Logos.LINE_LENGTH);
-        System.out.println(indent + line);
-        System.out.println(indent + "Here's your current tasks, in order of when they were added:");
-        for (int i = 0; i < Logos.tasks.size(); i++) {
-            Task currentTask = Logos.tasks.get(i);
-            System.out.printf("%s%d. %s\n", indent, i + 1, currentTask.getAsListItem());
-        }
-        System.out.println(indent + line);
+        ui.showList(Logos.taskList.listTasks(), "Here's your current tasks, in order of when they were added:");
     }
 
     private static void markTaskAsDone(Ui ui, int taskIndex) throws InvalidIndexException, IOException {
-        if (taskIndex > Logos.tasks.size() | taskIndex <= 0) {
-            throw new InvalidIndexException(taskIndex);
-        }
-        Task selectedTask = Logos.tasks.get(taskIndex - 1);
-
-        if (selectedTask.isDone()) {
-            ui.respond("This task is already marked as done!", selectedTask.getAsListItem());
-            return;
-        }
-
-        selectedTask.markAsDone();
-        ui.respond("Nice! I've marked this task as done:", selectedTask.getAsListItem());
-        Logos.storage.saveTasks(tasks);
+        Task selectedTask = Logos.taskList.markTask(taskIndex);
+        ui.respond("Task marked as done:", selectedTask.getAsListItem());
     }
 
     private static void markTaskAsNotDone(Ui ui, int taskIndex) throws InvalidIndexException, IOException {
-        if (taskIndex > Logos.tasks.size() | taskIndex <= 0) {
-            throw new InvalidIndexException(taskIndex);
-        }
-        Task selectedTask = Logos.tasks.get(taskIndex - 1);
-
-        if (!selectedTask.isDone()) {
-            ui.respond("This task is already marked as not done!", selectedTask.getAsListItem());
-            return;
-        }
-
-        selectedTask.markAsNotDone();
-        ui.respond("Alright! I've marked this task as not done yet:", selectedTask.getAsListItem());
-        Logos.storage.saveTasks(tasks);
+        Task selectedTask = Logos.taskList.unmarkTask(taskIndex);
+        ui.respond("Task marked as not done yet:", selectedTask.getAsListItem());
     }
 
     private static void deleteTask(Ui ui, int taskIndex) throws InvalidIndexException, IOException {
-        if (taskIndex > Logos.tasks.size() | taskIndex <= 0) {
-            throw new InvalidIndexException(taskIndex);
-        }
-        Task selectedTask = Logos.tasks.get(taskIndex - 1);
-        Logos.tasks.remove(taskIndex - 1);
+        Task selectedTask = Logos.taskList.deleteTask(taskIndex);
         ui.respond("Todo removed: \"" + selectedTask.getDescription() + "\"",
-                String.format("Now you have %d tasks in the list~", Logos.tasks.size()),
+                String.format("Now you have %d tasks in the list~", Logos.taskList.size()),
                 "Use the command 'list' to view your current task list");
-        Logos.storage.saveTasks(tasks);
     }
 }

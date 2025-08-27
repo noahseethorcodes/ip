@@ -1,5 +1,6 @@
 package ui;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Ui {
@@ -43,6 +44,18 @@ public class Ui {
                 "-> unmark <taskNumber>                     : Mark a task as not done",
                 "-> bye                                     : Exit the program");
     };
+
+    public void showList(List<String> list, String pretext) {
+        String indent = " ".repeat(INDENT_LENGTH);
+        String dividerLine = "-".repeat(LINE_LENGTH);
+        System.out.println(indent + dividerLine);
+        System.out.println(indent + pretext);
+        for (int i = 0; i < list.size(); i++) {
+            String currentLine = list.get(i);
+            System.out.printf("%s%d. %s\n", indent, i + 1, currentLine);
+        }
+        System.out.println(indent + dividerLine);
+    }
 
     public void showExit() {
         closeScanner();
