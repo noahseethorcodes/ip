@@ -1,13 +1,7 @@
 import java.io.IOException;
-import java.util.List;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-
-import tasks.Task;
-import tasks.Todo;
-import tasks.Deadline;
-import tasks.Event;
 
 import ui.Ui;
 
@@ -16,7 +10,17 @@ import localstorage.Storage;
 import tasklist.TaskList;
 import errors.InvalidCommandFormatException;
 import errors.InvalidIndexException;
+import errors.LogosException;
+import commands.ByeCommand;
+import commands.Command;
 import commands.CommandType;
+import commands.DeadlineCommand;
+import commands.DeleteCommand;
+import commands.EventCommand;
+import commands.ListCommand;
+import commands.MarkCommand;
+import commands.TodoCommand;
+import commands.UnmarkCommand;
 
 public class Logos {
     private static TaskList taskList;
@@ -52,46 +56,48 @@ public class Logos {
             String commandKeyword = parts[0];
             String argument = parts.length > 1 ? parts[1] : null;
             try {
-                CommandType command = CommandType.fromString(commandKeyword);
-                switch (command) {
+                CommandType commandType = CommandType.fromString(commandKeyword);
+                Command command = null;
+                switch (commandType) {
                     case BYE -> {
                         chatActive = false;
+                        command = new ByeCommand();
                     }
                     case LIST -> {
-                        Logos.listTasks(ui);
+                        command = new ListCommand();
                     }
                     case MARK -> {
                         if (argument != null) {
                             try {
                                 int taskNumber = Integer.parseInt(argument);
-                                Logos.markTaskAsDone(ui, taskNumber);
+                                command = new MarkCommand(taskNumber);
                             } catch (NumberFormatException e) {
                                 ui.respond("Invalid task number!");
                             }
                         } else {
-                            throw new InvalidCommandFormatException(command.getKeyword(), "mark <taskNumber>");
+                            throw new InvalidCommandFormatException(commandType.getKeyword(), "mark <taskNumber>");
                         }
                     }
                     case UNMARK -> {
                         if (argument != null) {
                             try {
                                 int taskNumber = Integer.parseInt(argument);
-                                Logos.markTaskAsNotDone(ui, taskNumber);
+                                command = new UnmarkCommand(taskNumber);
                             } catch (NumberFormatException e) {
                                 ui.respond("Invalid task number!");
                             }
                         } else {
-                            throw new InvalidCommandFormatException(command.getKeyword(), "unmark <taskNumber>");
+                            throw new InvalidCommandFormatException(commandType.getKeyword(), "unmark <taskNumber>");
                         }
                     }
                     case TODO -> {
-                        Logos.addTodo(ui, argument);
+                        command = new TodoCommand(argument);
                     }
                     case DEADLINE -> {
                         int byPos = argument.toLowerCase().indexOf("/by");
                         if (byPos < 0) {
                             throw new InvalidCommandFormatException(
-                                    command.getKeyword(), 
+                                    commandType.getKeyword(), 
                                     "deadline <desc> /by <yyyy-MM-dd HHmm>"
                             );
                         } 
@@ -104,23 +110,22 @@ public class Logos {
                             deadline = LocalDateTime.parse(by, INPUT_FORMAT);
                         } catch (DateTimeParseException e) {
                             throw new InvalidCommandFormatException(
-                                    command.getKeyword(), 
+                                    commandType.getKeyword(), 
                                     "Date should be in yyyy-MM-dd HHmm format, e.g., 2019-12-02 1800"
                             );
                         }
 
                         if (description.isEmpty()) {
-                            throw new InvalidCommandFormatException(command.getKeyword(),
+                            throw new InvalidCommandFormatException(commandType.getKeyword(),
                                     "deadline <desc> /by <yyyy-MM-dd HHmm>");
-                        } else {
-                            Logos.addDeadline(ui, description, deadline);
                         }
+                        command = new DeadlineCommand(description, deadline);
                     }
                     case EVENT -> {
                         int fromPos = argument.indexOf("/from");
                         int toPos = argument.indexOf("/to");
                         if (fromPos < 0 || toPos < 0 || toPos <= fromPos) {
-                            throw new InvalidCommandFormatException(command.getKeyword(),
+                            throw new InvalidCommandFormatException(commandType.getKeyword(),
                                     "event <desc> /from <start> /to <end>");
                         } 
 
@@ -135,33 +140,36 @@ public class Logos {
                             endDateTime = LocalDateTime.parse(to, INPUT_FORMAT);
                         } catch (DateTimeParseException e) {
                             throw new InvalidCommandFormatException(
-                                    command.getKeyword(), 
+                                    commandType.getKeyword(), 
                                     "Date should be in yyyy-MM-dd HHmm format, e.g., 2019-12-02 1800"
                             );
                         }
 
                         if (desc.isEmpty()) {
-                            throw new InvalidCommandFormatException(command.getKeyword(),
+                            throw new InvalidCommandFormatException(commandType.getKeyword(),
                                     "event <desc> /from <start> /to <end>");
-                        } else {
-                            Logos.addEvent(ui, desc, startDateTime, endDateTime);
                         }
+                        command = new EventCommand(desc, startDateTime, endDateTime);
                     }
                     case DELETE -> {
                         if (argument != null) {
                             try {
                                 int taskNumber = Integer.parseInt(argument);
-                                Logos.deleteTask(ui, taskNumber);
+                                command = new DeleteCommand(taskNumber);
                             } catch (NumberFormatException e) {
                                 ui.respond("Invalid task number!");
                             }
                         } else {
-                            throw new InvalidCommandFormatException(command.getKeyword(), "delete <taskNumber>");
+                            throw new InvalidCommandFormatException(commandType.getKeyword(), "delete <taskNumber>");
                         }
                     }
                     default -> {
-                        throw new UnknownCommandException(command.getKeyword());
+                        throw new UnknownCommandException(commandType.getKeyword());
                     }
+                }
+
+                if (command != null) {
+                    command.execute(taskList, ui);
                 }
             } catch (UnknownCommandException e) {
                 ui.respond(e.getMessage());
@@ -171,65 +179,9 @@ public class Logos {
                 ui.respond(e.getMessage());
             } catch (IOException e) {
                 ui.respond("Error handling local storage: " + e.getMessage());
+            } catch (LogosException e) {
+                ui.respond(e.getMessage());
             }
         }
-
-        // Exit message on 'bye' command.
-        ui.showExit();
-    }
-
-    private static void addTodo(Ui ui, String taskName) throws IOException{
-        Todo newTodo = Logos.taskList.addTodo(taskName);
-        ui.respond("Todo added: \"" + newTodo.getDescription() + "\"",
-                String.format("Now you have %d tasks in the list~", Logos.taskList.size()),
-                "Use the command 'list' to view your current task list");
-    }
-
-    private static void addDeadline(Ui ui, String taskName, LocalDateTime deadline) throws IOException {
-        Deadline newDeadline = Logos.taskList.addDeadline(taskName, deadline);
-        ui.respond(
-                String.format("Deadline added: \"%s\", (by: %s)",
-                        newDeadline.getDescription(),
-                        newDeadline.getDeadline()),
-                String.format("Now you have %d tasks in the list~", Logos.taskList.size()),
-                "Use the command 'list' to view your current task list");
-    }
-
-    private static void addEvent(Ui ui, String taskName, LocalDateTime startDateTime, LocalDateTime endDateTime) throws IOException {
-        Event newEvent = Logos.taskList.addEvent(taskName, startDateTime, endDateTime);
-        ui.respond(
-                String.format("Event added: \"%s\", (from: %s, to: %s)",
-                        newEvent.getDescription(),
-                        newEvent.getStartDateTime(),
-                        newEvent.getEndDateTime()),
-                String.format("Now you have %d tasks in the list~", Logos.taskList.size()),
-                "Use the command 'list' to view your current task list");
-    }
-
-    private static void listTasks(Ui ui) {
-        List<String> list = Logos.taskList.listTasks();
-        if (list.isEmpty()) {
-            ui.respond("There are no tasks in your task list currently.",
-                    "Type in the name of a task to add it to the task list");
-            return;
-        }
-        ui.showList(Logos.taskList.listTasks(), "Here's your current tasks, in order of when they were added:");
-    }
-
-    private static void markTaskAsDone(Ui ui, int taskIndex) throws InvalidIndexException, IOException {
-        Task selectedTask = Logos.taskList.markTask(taskIndex);
-        ui.respond("Task marked as done:", selectedTask.getAsListItem());
-    }
-
-    private static void markTaskAsNotDone(Ui ui, int taskIndex) throws InvalidIndexException, IOException {
-        Task selectedTask = Logos.taskList.unmarkTask(taskIndex);
-        ui.respond("Task marked as not done yet:", selectedTask.getAsListItem());
-    }
-
-    private static void deleteTask(Ui ui, int taskIndex) throws InvalidIndexException, IOException {
-        Task selectedTask = Logos.taskList.deleteTask(taskIndex);
-        ui.respond("Todo removed: \"" + selectedTask.getDescription() + "\"",
-                String.format("Now you have %d tasks in the list~", Logos.taskList.size()),
-                "Use the command 'list' to view your current task list");
     }
 }
