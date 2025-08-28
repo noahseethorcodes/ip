@@ -1,3 +1,5 @@
+package logos;
+
 import java.io.IOException;
 
 import ui.Ui;
@@ -9,6 +11,7 @@ import tasklist.TaskList;
 import errors.InvalidCommandFormatException;
 import errors.InvalidIndexException;
 import errors.LogosException;
+import commands.ByeCommand;
 import commands.Command;
 
 public class Logos {
@@ -44,6 +47,9 @@ public class Logos {
                 Command command = parser.parse(userInput);
                 if (command != null) {
                     command.execute(taskList, ui);
+                }
+                if (command instanceof ByeCommand) {
+                    chatActive = false;
                 }
             } catch (UnknownCommandException e) {
                 ui.respond(e.getMessage());
