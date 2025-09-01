@@ -10,6 +10,7 @@ import commands.CommandType;
 import commands.DeadlineCommand;
 import commands.DeleteCommand;
 import commands.EventCommand;
+import commands.FindCommand;
 import commands.ListCommand;
 import commands.MarkCommand;
 import commands.TodoCommand;
@@ -147,6 +148,9 @@ public class Parser {
                 } else {
                     throw new InvalidCommandFormatException(commandType.getKeyword(), "delete <taskNumber>");
                 }
+            }
+            case FIND -> {
+                command = new FindCommand(argument);
             }
             default -> {
                 throw new UnknownCommandException(commandType.getKeyword());

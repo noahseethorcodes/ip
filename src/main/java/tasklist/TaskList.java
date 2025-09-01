@@ -185,4 +185,11 @@ public class TaskList {
         saveToStorage();
         return selectedTask;
     }
+
+    public List<String> find(String searchWord) {
+        return tasks.stream()
+                .filter(task -> task.getDescription().toLowerCase().contains(searchWord.toLowerCase()))
+                .map(Task::getAsListItem)
+                .toList();
+    }
 }
