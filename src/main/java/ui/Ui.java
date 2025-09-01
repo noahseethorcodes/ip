@@ -71,7 +71,8 @@ public class Ui {
                 "Here are some commands you can try:",
                 "-> todo <desc>                             : Add a simple task",
                 "-> deadline <desc> /by <time>              : Add a task with a deadline (<yyyy-MM-dd HHmm>)",
-                "-> event <desc> /from <start> /to <end>    : Add an event with a start and end time (<yyyy-MM-dd HHmm>)",
+                "-> event <desc> /from <start> /to <end>"
+                        + "    : Add an event with a start and end time (<yyyy-MM-dd HHmm>)",
                 "-> list                                    : Show all tasks",
                 "-> mark <taskNumber>                       : Mark a task as done",
                 "-> unmark <taskNumber>                     : Mark a task as not done",

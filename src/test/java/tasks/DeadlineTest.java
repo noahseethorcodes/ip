@@ -17,7 +17,8 @@ public class DeadlineTest {
     @Test
     @DisplayName("getDeadline returns formatted date in 'MMM dd yyyy, h:mma' format")
     void getDeadline_formatsCorrectly() {
-        LocalDateTime dt = LocalDateTime.of(2025, 8, 28, 14, 30); // Aug 28 2025, 2:30PM
+        // Aug 28 2025, 2:30PM
+        LocalDateTime dt = LocalDateTime.of(2025, 8, 28, 14, 30); 
         Deadline d = new Deadline("submit report", dt);
 
         assertEquals("Aug 28 2025, 2:30pm", d.getDeadline());
