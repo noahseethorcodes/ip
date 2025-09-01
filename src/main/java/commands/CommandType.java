@@ -10,7 +10,8 @@ public enum CommandType {
     MARK("mark"),
     UNMARK("unmark"),
     DELETE("delete"),
-    BYE("bye");
+    BYE("bye"),
+    FIND("find");
 
     private final String keyword;
 
@@ -22,7 +23,9 @@ public enum CommandType {
         return keyword;
     }
 
-    // Factory method to parse user input into a CommandType
+    /** 
+     * Factory method to parse user input into a CommandType
+     */ 
     public static CommandType fromString(String input) throws UnknownCommandException {
         for (CommandType cmd : values()) {
             if (cmd.keyword.equalsIgnoreCase(input)) {

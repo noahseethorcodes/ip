@@ -12,10 +12,9 @@ public class ListCommand implements Command {
     public void execute(TaskList taskList, Ui ui) throws LogosException, IOException {
         List<String> list = taskList.listTasks();
         if (list.isEmpty()) {
-            ui.respond("There are no tasks in your task list currently.",
-                    "Type in the name of a task to add it to the task list");
+            ui.respond("There are no tasks in your task list currently.");
             return;
         }
-        ui.showList(taskList.listTasks(), "Here's your current tasks, in order of when they were added:");
+        ui.showList(list, "Here's your current tasks, in order of when they were added:");
     }
 }
