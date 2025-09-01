@@ -18,9 +18,29 @@ import errors.InvalidCommandFormatException;
 import errors.LogosException;
 import errors.UnknownCommandException;
 
+/**
+ * Parses raw user input into executable {@link Command} objects.
+ *
+ * Date/time fields are parsed using the pattern {@code yyyy-MM-dd HHmm}
+ * (e.g., {@code 2019-12-02 1800}).
+ */
 public class Parser {
     private static final DateTimeFormatter INPUT_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
 
+     /**
+      * Parses a single line of user input and returns the corresponding {@link Command}.
+      * <p>
+      * The first token is treated as the command keyword; the remainder (if any) is
+      * parsed as the argument string. Commands that require dates/times expect the
+      * format {@code yyyy-MM-dd HHmm}.
+      *
+      * @param userInput the raw input line from the user
+      * @return a concrete {@link Command} ready to be executed
+      * @throws InvalidCommandFormatException if the command is recognized but its arguments
+      *         are missing or malformed (e.g., wrong date format or non-numeric index)
+      * @throws UnknownCommandException if the command keyword is not recognized
+      * @throws LogosException if another parsing-related error occurs
+      */
     public Command parse(String userInput) throws LogosException {
         String[] parts = userInput.split(" ", 2); // split into [command, argument]
         String commandKeyword = parts[0];
