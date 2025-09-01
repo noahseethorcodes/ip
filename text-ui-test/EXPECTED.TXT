@@ -71,6 +71,19 @@ Welcome to...
     Use the command 'list' to view your current task list
     --------------------------------------------------------------------------------
     --------------------------------------------------------------------------------
+    Here's your current tasks, in order of when they were added:
+    1. [T] [X] Todo1
+    2. [D] [ ] CS2103T Homework (by: Aug 20 2025, 11:59pm)
+    3. [E] [ ] CS2103T Tutorial (from: Aug 21 2025, 1:00pm, to: Aug 21 2025, 2:00pm)
+    4. [T] [ ] Todo2
+    5. [T] [ ] Todo3
+    --------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------
+    Here are the matching tasks in your list for 'CS2103T':
+    1. [D] [ ] CS2103T Homework (by: Aug 20 2025, 11:59pm)
+    2. [E] [ ] CS2103T Tutorial (from: Aug 21 2025, 1:00pm, to: Aug 21 2025, 2:00pm)
+    --------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------
     Todo removed: "Todo1"
     Now you have 4 tasks in the list~
     Use the command 'list' to view your current task list
