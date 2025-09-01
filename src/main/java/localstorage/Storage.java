@@ -30,7 +30,7 @@ public class Storage {
         this.filePath = filePath;
 
         File f = new File(filePath); // create a File for the given file path
-        if (!f.isFile()) { 
+        if (!f.isFile()) {
             System.out.println("Could not find existing data file. Creating new data file...");
             // Ensure parent directories exist
             File parentDir = f.getParentFile();
@@ -86,9 +86,9 @@ public class Storage {
         } else {
             System.out.println(
                     String.format("Tasks loaded: %d tasks found in storage, "
-                            + "%d tasks loaded successfully, %d tasks failed", 
+                            + "%d tasks loaded successfully, %d tasks failed",
                             successCount + failedCount,
-                            successCount, 
+                            successCount,
                             failedCount));
         }
     }

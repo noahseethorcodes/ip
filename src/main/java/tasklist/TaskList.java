@@ -132,7 +132,7 @@ public class TaskList {
         if (taskIndex > tasks.size() | taskIndex <= 0) {
             throw new InvalidIndexException(taskIndex);
         }
-        
+
         Task selectedTask = tasks.get(taskIndex - 1);
 
         if (selectedTask.isDone()) {
@@ -156,7 +156,7 @@ public class TaskList {
         if (taskIndex > tasks.size() | taskIndex <= 0) {
             throw new InvalidIndexException(taskIndex);
         }
-        
+
         Task selectedTask = tasks.get(taskIndex - 1);
 
         if (!selectedTask.isDone()) {
