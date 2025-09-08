@@ -25,8 +25,8 @@ public class EventCommand implements Command {
         return(ui.respond(
                 String.format("Event added: \"%s\", (from: %s, to: %s)",
                         newEvent.getDescription(),
-                        newEvent.getStartDateTime(),
-                        newEvent.getEndDateTime()),
+                        newEvent.getStartDateTimeString(),
+                        newEvent.getEndDateTimeString()),
                 String.format("Now you have %d tasks in the list~", taskList.size()),
                 "Use the command 'list' to view your current task list"));
     }

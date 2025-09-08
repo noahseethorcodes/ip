@@ -13,6 +13,7 @@ import commands.EventCommand;
 import commands.FindCommand;
 import commands.ListCommand;
 import commands.MarkCommand;
+import commands.SortCommand;
 import commands.TodoCommand;
 import commands.UnmarkCommand;
 import errors.InvalidCommandFormatException;
@@ -59,6 +60,7 @@ public class Parser {
             case UNMARK  -> parseUnmark(argument);
             case DELETE  -> parseDelete(argument);
             case FIND    -> parseFind(argument);
+            case SORT    -> parseSort();
         };
     }
 
@@ -211,6 +213,15 @@ public class Parser {
     private Command parseFind(String arg) throws InvalidCommandFormatException {
         String q = requireArg(arg, "find <keyword>");
         return new FindCommand(q);
+    }
+
+    /**
+     * Parses a {@code sort} command.
+     *
+     * @return a {@link SortCommand} that sorts the tasklist in chronological order
+     */
+    private Command parseSort() {
+        return new SortCommand();
     }
 
     // ── Shared helpers ────────────────────────────────────────────────────

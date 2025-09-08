@@ -12,8 +12,12 @@ public class Deadline extends Task {
         this.deadline = deadline;
     }
 
-    public String getDeadline() {
+    public String getDeadlineString() {
         return this.deadline.format(DISPLAY_FORMAT);
+    }
+
+    public LocalDateTime getDeadline() {
+        return this.deadline;
     }
 
     @Override
@@ -27,7 +31,7 @@ public class Deadline extends Task {
                 this.getTaskTypeIcon(),
                 this.getStatusIcon(),
                 this.getDescription(),
-                this.getDeadline());
+                this.getDeadlineString());
     }
 
     @Override
