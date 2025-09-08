@@ -44,6 +44,7 @@ public class Parser {
       */
     public Command parse(String userInput) throws LogosException {
         String[] parts = userInput.split(" ", 2); // split into [command, argument]
+        assert parts.length >= 1 : "Parser must always find at least one word";
         String commandKeyword = parts[0];
         String argument = parts.length > 1 ? parts[1] : null;
         CommandType commandType = CommandType.fromString(commandKeyword);

@@ -132,7 +132,7 @@ public class TaskList {
         if (taskIndex > tasks.size() | taskIndex <= 0) {
             throw new InvalidIndexException(taskIndex);
         }
-
+        assert taskIndex >= 1 && taskIndex <= tasks.size() : "Index out of bounds for task list";
         Task selectedTask = tasks.get(taskIndex - 1);
 
         if (selectedTask.isDone()) {
@@ -156,7 +156,7 @@ public class TaskList {
         if (taskIndex > tasks.size() | taskIndex <= 0) {
             throw new InvalidIndexException(taskIndex);
         }
-
+        assert taskIndex >= 1 && taskIndex <= tasks.size() : "Index out of bounds for task list";
         Task selectedTask = tasks.get(taskIndex - 1);
 
         if (!selectedTask.isDone()) {
@@ -180,6 +180,7 @@ public class TaskList {
         if (taskIndex > tasks.size() | taskIndex <= 0) {
             throw new InvalidIndexException(taskIndex);
         }
+        assert taskIndex >= 1 && taskIndex <= tasks.size() : "Index out of bounds for task list";
         Task selectedTask = tasks.get(taskIndex - 1);
         tasks.remove(taskIndex - 1);
         saveToStorage();
