@@ -15,10 +15,10 @@ public class TodoCommand implements Command {
     }
 
     @Override
-    public void execute(TaskList taskList, Ui ui) throws LogosException, IOException {
+    public String execute(TaskList taskList, Ui ui) throws LogosException, IOException {
         Todo newTodo = taskList.addTodo(taskName);
-        ui.respond("Todo added: \"" + newTodo.getDescription() + "\"",
+        return(ui.respond("Todo added: \"" + newTodo.getDescription() + "\"",
                 String.format("Now you have %d tasks in the list~", taskList.size()),
-                "Use the command 'list' to view your current task list");
+                "Use the command 'list' to view your current task list"));
     }
 }

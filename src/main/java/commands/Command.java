@@ -8,5 +8,5 @@ import ui.Ui;
 
 @FunctionalInterface
 public interface Command {
-    void execute(TaskList tasks, Ui ui) throws LogosException, IOException;
+    String execute(TaskList tasks, Ui ui) throws LogosException, IOException;
 }

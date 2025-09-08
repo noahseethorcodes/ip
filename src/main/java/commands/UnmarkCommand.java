@@ -15,8 +15,8 @@ public class UnmarkCommand implements Command {
     }
 
     @Override
-    public void execute(TaskList taskList, Ui ui) throws LogosException, IOException {
+    public String execute(TaskList taskList, Ui ui) throws LogosException, IOException {
         Task selectedTask = taskList.unmarkTask(taskIndex);
-        ui.respond("Task marked as not done yet:", selectedTask.getAsListItem());
+        return(ui.respond("Task marked as not done yet:", selectedTask.getAsListItem()));
     }
 }
