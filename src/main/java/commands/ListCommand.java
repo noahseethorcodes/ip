@@ -9,12 +9,11 @@ import ui.Ui;
 
 public class ListCommand implements Command {
     @Override
-    public void execute(TaskList taskList, Ui ui) throws LogosException, IOException {
+    public String execute(TaskList taskList, Ui ui) throws LogosException, IOException {
         List<String> list = taskList.listTasks();
         if (list.isEmpty()) {
-            ui.respond("There are no tasks in your task list currently.");
-            return;
+            return(ui.respond("There are no tasks in your task list currently."));
         }
-        ui.showList(list, "Here's your current tasks, in order of when they were added:");
+        return(ui.showList(list, "Here's your current tasks, in order of when they were added:"));
     }
 }

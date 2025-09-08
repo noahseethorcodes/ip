@@ -15,10 +15,10 @@ public class DeleteCommand implements Command {
     }
 
     @Override
-    public void execute(TaskList taskList, Ui ui) throws LogosException, IOException {
+    public String execute(TaskList taskList, Ui ui) throws LogosException, IOException {
         Task selectedTask = taskList.deleteTask(taskIndex);
-        ui.respond("Todo removed: \"" + selectedTask.getDescription() + "\"",
+        return(ui.respond("Todo removed: \"" + selectedTask.getDescription() + "\"",
                 String.format("Now you have %d tasks in the list~", taskList.size()),
-                "Use the command 'list' to view your current task list");
+                "Use the command 'list' to view your current task list"));
     }
 }

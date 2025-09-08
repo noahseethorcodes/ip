@@ -15,53 +15,55 @@ import commands.ByeCommand;
 import commands.Command;
 
 public class Logos {
-    private static TaskList taskList;
-
     private static String LOCAL_STORAGE_FILE_PATH = "./data/tasks.txt";
-    public static Storage storage;
+    
+    public Storage storage;
+    private TaskList taskList;
+    private Ui ui;
+    private Parser parser;
 
-    public static void main(String[] args) {
+    private boolean isActive = true;
+    
+
+    public Logos() {
         // Initialise Tasks
-        Logos.storage = new Storage(LOCAL_STORAGE_FILE_PATH);
-        Logos.taskList = new TaskList(storage);
-        Logos.taskList.loadFromStorgae();
+        this.storage = new Storage(LOCAL_STORAGE_FILE_PATH);
+        this.taskList = new TaskList(storage);
+        taskList.loadFromStorgae();
 
         // Initialise Ui and Parser
-        Ui ui = new Ui();
-        Parser parser = new Parser();
+        this.ui = new Ui();
+        this.parser = new Parser();
+    }
 
-        // Welcome!
-        String logo = " _                           \n"
-                + "| |    ___   __ _  ___  ___  \n"
-                + "| |   / _ \\ / _` |/ _ \\/ __| \n"
-                + "| |__| (_) | (_| | (_) \\__ \\ \n"
-                + "|_____\\___/ \\__, |\\___/|___/ \n"
-                + "            |___/            \n";
-        ui.showWelcome(logo, "Logos");
+    public boolean isActive() {
+        return this.isActive;
+    }
 
-        // Input and Response
-        Boolean chatActive = true;
-        while (chatActive) {
-            String userInput = ui.readLine();
-            try {
-                Command command = parser.parse(userInput);
-                if (command != null) {
-                    command.execute(taskList, ui);
-                }
+    public String getResponse(String userInput) {
+        try {
+            Command command = parser.parse(userInput);
+            if (command != null) {
                 if (command instanceof ByeCommand) {
-                    chatActive = false;
+                    this.isActive = false;
                 }
-            } catch (UnknownCommandException e) {
-                ui.respond(e.getMessage());
-            } catch (InvalidCommandFormatException e) {
-                ui.respond(e.getMessage());
-            } catch (InvalidIndexException e) {
-                ui.respond(e.getMessage());
-            } catch (IOException e) {
-                ui.respond("Error handling local storage: " + e.getMessage());
-            } catch (LogosException e) {
-                ui.respond(e.getMessage());
+                return(command.execute(taskList, ui));
             }
+        } catch (UnknownCommandException e) {
+            return(ui.respond(e.getMessage()));
+        } catch (InvalidCommandFormatException e) {
+            return(ui.respond(e.getMessage()));
+        } catch (InvalidIndexException e) {
+            return(ui.respond(e.getMessage()));
+        } catch (IOException e) {
+            return(ui.respond("Error handling local storage: " + e.getMessage()));
+        } catch (LogosException e) {
+            return(ui.respond(e.getMessage()));
         }
+        return "ERROR: LOGOS DOESN'T KNOW HOW TO RESPOND";
+    }
+
+    public String getWelcome() {
+        return ui.showWelcome("Logos", "Logos");
     }
 }

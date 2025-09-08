@@ -8,7 +8,7 @@ import ui.Ui;
 
 public class ByeCommand implements Command {
     @Override
-    public void execute(TaskList taskList, Ui ui) throws LogosException, IOException {
-        ui.showExit();
+    public String execute(TaskList taskList, Ui ui) throws LogosException, IOException {
+        return(ui.showExit());
     }
 }

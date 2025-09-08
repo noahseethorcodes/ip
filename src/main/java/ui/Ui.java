@@ -2,6 +2,7 @@ package ui;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.ArrayList;
 
 /**
  * Handles all user interface interactions in the terminal.
@@ -44,7 +45,7 @@ public class Ui {
      *
      * @param messages the lines of text to display
      */
-    public void respond(String... messages) {
+    public String respond(String... messages) {
         String indent = " ".repeat(INDENT_LENGTH);
         String dividerLine = "-".repeat(LINE_LENGTH);
         System.out.println(indent + dividerLine);
@@ -54,6 +55,20 @@ public class Ui {
             }
         }
         System.out.println(indent + dividerLine);
+        return (getGuiResponse(messages));
+    }
+
+    /**
+     * Displays one or more messages for the GUI
+     *
+     * @param messages the lines of text to display
+     */
+    private String getGuiResponse(String[] messages) {
+        StringBuilder sb = new StringBuilder();
+        for (String message : messages) {
+            sb.append(message).append("\n");
+        }
+        return sb.toString().trim(); // remove trailing newline
     }
 
     /**
@@ -63,9 +78,9 @@ public class Ui {
      * @param chatbotLogo the ASCII logo of the chatbot
      * @param chatbotName the display name of the chatbot
      */
-    public void showWelcome(String chatbotLogo, String chatbotName) {
+    public String showWelcome(String chatbotLogo, String chatbotName) {
         System.out.println("Welcome to...\n" + chatbotLogo);
-        this.respond(
+        return(respond(
                 "Hello! I'm " + chatbotName + " :) Your friendly terminal task manager.",
                 "",
                 "Here are some commands you can try:",
@@ -76,7 +91,7 @@ public class Ui {
                 "-> list                                    : Show all tasks",
                 "-> mark <taskNumber>                       : Mark a task as done",
                 "-> unmark <taskNumber>                     : Mark a task as not done",
-                "-> bye                                     : Exit the program");
+                "-> bye                                     : Exit the program"));
     };
 
     /**
@@ -85,23 +100,20 @@ public class Ui {
      * @param list the list of items to display
      * @param pretext the header or description shown before the list
      */
-    public void showList(List<String> list, String pretext) {
-        String indent = " ".repeat(INDENT_LENGTH);
-        String dividerLine = "-".repeat(LINE_LENGTH);
-        System.out.println(indent + dividerLine);
-        System.out.println(indent + pretext);
+    public String showList(List<String> list, String pretext) {
+        List<String> lines = new ArrayList<>();
+        lines.add(pretext);
         for (int i = 0; i < list.size(); i++) {
-            String currentLine = list.get(i);
-            System.out.printf("%s%d. %s\n", indent, i + 1, currentLine);
+            lines.add((i + 1) + ". " + list.get(i));
         }
-        System.out.println(indent + dividerLine);
+        return respond(lines.toArray(new String[0]));
     }
 
     /**
      * Displays a goodbye message and closes the input scanner.
      */
-    public void showExit() {
+    public String showExit() {
         closeScanner();
-        respond("Bye. Hope to see you again soon!");
+        return(respond("Bye. Hope to see you again soon!"));
     }
 }

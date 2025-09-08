@@ -20,14 +20,14 @@ public class EventCommand implements Command {
     }
 
     @Override
-    public void execute(TaskList taskList, Ui ui) throws LogosException, IOException {
+    public String execute(TaskList taskList, Ui ui) throws LogosException, IOException {
         Event newEvent = taskList.addEvent(taskName, startDateTime, endDateTime);
-        ui.respond(
+        return(ui.respond(
                 String.format("Event added: \"%s\", (from: %s, to: %s)",
                         newEvent.getDescription(),
                         newEvent.getStartDateTime(),
                         newEvent.getEndDateTime()),
                 String.format("Now you have %d tasks in the list~", taskList.size()),
-                "Use the command 'list' to view your current task list");
+                "Use the command 'list' to view your current task list"));
     }
 }

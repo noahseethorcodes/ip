@@ -15,8 +15,8 @@ public class MarkCommand implements Command {
     }
 
     @Override
-    public void execute(TaskList taskList, Ui ui) throws LogosException, IOException {
+    public String execute(TaskList taskList, Ui ui) throws LogosException, IOException {
         Task selectedTask = taskList.markTask(taskIndex);
-        ui.respond("Task marked as done:", selectedTask.getAsListItem());
+        return(ui.respond("Task marked as done:", selectedTask.getAsListItem()));
     }
 }
