@@ -14,12 +14,20 @@ public class Event extends Task {
         this.endDateTime = endDateTime;
     }
 
-    public String getStartDateTime() {
+    public String getStartDateTimeString() {
         return this.startDateTime.format(DISPLAY_FORMAT);
     }
 
-    public String getEndDateTime() {
+    public String getEndDateTimeString() {
         return this.endDateTime.format(DISPLAY_FORMAT);
+    }
+
+    public LocalDateTime getStartDateTime() {
+        return this.startDateTime;
+    }
+
+    public LocalDateTime getEndDateTime() {
+        return this.endDateTime;
     }
 
     @Override
@@ -33,8 +41,8 @@ public class Event extends Task {
                 this.getTaskTypeIcon(),
                 this.getStatusIcon(),
                 this.getDescription(),
-                this.getStartDateTime(),
-                this.getEndDateTime());
+                this.getStartDateTimeString(),
+                this.getEndDateTimeString());
     }
 
     @Override

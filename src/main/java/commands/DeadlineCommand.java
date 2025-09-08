@@ -23,7 +23,7 @@ public class DeadlineCommand implements Command {
         return(ui.respond(
                 String.format("Deadline added: \"%s\", (by: %s)",
                         newDeadline.getDescription(),
-                        newDeadline.getDeadline()),
+                        newDeadline.getDeadlineString()),
                 String.format("Now you have %d tasks in the list~", taskList.size()),
                 "Use the command 'list' to view your current task list"));
     }

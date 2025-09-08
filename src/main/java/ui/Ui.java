@@ -80,18 +80,21 @@ public class Ui {
      */
     public String showWelcome(String chatbotLogo, String chatbotName) {
         System.out.println("Welcome to...\n" + chatbotLogo);
-        return(respond(
-                "Hello! I'm " + chatbotName + " :) Your friendly terminal task manager.",
+        return respond(
+                "Hello! I'm " + chatbotName + " :) Your friendly chatbot task manager.",
                 "",
                 "Here are some commands you can try:",
                 "-> todo <desc>                             : Add a simple task",
                 "-> deadline <desc> /by <time>              : Add a task with a deadline (<yyyy-MM-dd HHmm>)",
-                "-> event <desc> /from <start> /to <end>"
-                        + "    : Add an event with a start and end time (<yyyy-MM-dd HHmm>)",
+                "-> event <desc> /from <start> /to <end>    : Add an event with a start and end time (<yyyy-MM-dd HHmm>)",
                 "-> list                                    : Show all tasks",
                 "-> mark <taskNumber>                       : Mark a task as done",
                 "-> unmark <taskNumber>                     : Mark a task as not done",
-                "-> bye                                     : Exit the program"));
+                "-> delete <taskNumber>                     : Delete a task",
+                "-> find <keyword>                          : Find tasks containing a keyword",
+                "-> sort                                    : Sort tasks (Todos first, then Deadlines and Events in chronological order)",
+                "-> bye                                     : Exit the program"
+        );
     }
 
     /**

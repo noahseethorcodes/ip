@@ -3,6 +3,7 @@ package tasklist;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import errors.InvalidIndexException;
@@ -193,4 +194,72 @@ public class TaskList {
                 .map(Task::getAsListItem)
                 .toList();
     }
+
+    /**
+     * Sorts the in-memory task list with the following precedence and then saves:
+     * <ol>
+     *   <li>Todos first (relative order among Todos is preserved)</li>
+     *   <li>Deadlines next, ascending by deadline datetime</li>
+     *   <li>Events last, ascending by start datetime, then by end datetime</li>
+     * </ol>
+     * When comparing a deadline against an event, the deadline's datetime is
+     * compared against the event's start datetime.
+     *
+     * @throws IOException if an error occurs while saving to storage
+     */
+    public void sortTasks() throws IOException {
+        Comparator<Task> cmp = (a, b) -> {
+            int ra = rank(a);
+            int rb = rank(b);
+            if (ra != rb) return Integer.compare(ra, rb);
+
+            // Same rank → type-specific comparison
+            if (a instanceof Todo && b instanceof Todo) {
+                // Keep insertion order for Todos; List.sort is stable.
+                return 0;
+            }
+
+            if (a instanceof Deadline && b instanceof Deadline) {
+                LocalDateTime deadlineA = ((Deadline) a).getDeadline();
+                LocalDateTime deadlineB = ((Deadline) b).getDeadline();
+                return deadlineA.compareTo(deadlineB);
+            }
+
+            if (a instanceof Event && b instanceof Event) {
+                Event eventA = (Event) a;
+                Event eventB = (Event) b;
+                int byStart = eventA.getStartDateTime().compareTo(eventB.getStartDateTime());
+                return (byStart != 0) ? byStart : eventA.getEndDateTime().compareTo(eventB.getEndDateTime());
+            }
+
+            // Cross-type within same rank (Deadline vs Event)
+            if (a instanceof Deadline && b instanceof Event) {
+                LocalDateTime deadlineA = ((Deadline) a).getDeadline();
+                LocalDateTime eventBStart = ((Event) b).getStartDateTime();
+                return deadlineA.compareTo(eventBStart);
+            }
+            if (a instanceof Event && b instanceof Deadline) {
+                LocalDateTime eventAStart = ((Event) a).getStartDateTime();
+                LocalDateTime deadlineB = ((Deadline) b).getDeadline();
+                return eventAStart.compareTo(deadlineB);
+            }
+
+            // Fallback: keep order
+            return 0;
+        };
+
+        // TimSort used by List.sort is stable → Todos keep relative order
+        tasks.sort(cmp);
+        saveToStorage();
+    }
+
+    /** Returns a type rank: lower comes first (Todo → Deadline → Event). */
+    private static int rank(Task t) {
+        if (t instanceof Todo) return 0;
+        if (t instanceof Deadline) return 1;
+        if (t instanceof Event) return 2;
+        // Unknown kinds go last by default
+        return Integer.MAX_VALUE;
+    }
+
 }

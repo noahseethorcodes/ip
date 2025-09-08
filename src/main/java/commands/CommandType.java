@@ -11,7 +11,8 @@ public enum CommandType {
     UNMARK("unmark"),
     DELETE("delete"),
     BYE("bye"),
-    FIND("find");
+    FIND("find"),
+    SORT("sort");
 
     private final String keyword;
 

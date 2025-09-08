@@ -21,7 +21,7 @@ public class DeadlineTest {
         LocalDateTime dt = LocalDateTime.of(2025, 8, 28, 14, 30); 
         Deadline d = new Deadline("submit report", dt);
 
-        assertEquals("Aug 28 2025, 2:30pm", d.getDeadline());
+        assertEquals("Aug 28 2025, 2:30pm", d.getDeadlineString());
     }
 
     @Test
@@ -82,7 +82,7 @@ public class DeadlineTest {
         assertNotNull(d);
         assertEquals("grocery shopping", d.getDescription());
         assertFalse(d.isDone());
-        assertEquals("Jul 20 2025, 6:00pm", d.getDeadline());
+        assertEquals("Jul 20 2025, 6:00pm", d.getDeadlineString());
     }
 
     @Test
@@ -118,6 +118,6 @@ public class DeadlineTest {
         assertNotNull(restored);
         assertEquals(original.getDescription(), restored.getDescription());
         assertEquals(original.isDone(), restored.isDone());
-        assertEquals(original.getDeadline(), restored.getDeadline());
+        assertEquals(original.getDeadlineString(), restored.getDeadlineString());
     }
 }
