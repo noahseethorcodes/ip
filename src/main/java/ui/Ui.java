@@ -17,9 +17,9 @@ import java.util.ArrayList;
  * for readability.
  */
 public class Ui {
-    private final int INDENT_LENGTH = 4;
-    private final int LINE_LENGTH = 80;
-    private final Scanner sc = new Scanner(System.in);;
+    private final static int INDENT_LENGTH = 4;
+    private final static int LINE_LENGTH = 80;
+    private final Scanner sc = new Scanner(System.in);
 
     /**
      * Reads a single line of text from the user.
@@ -29,7 +29,7 @@ public class Ui {
     public String readLine() {
         String userInput = sc.nextLine();
         return userInput;
-    };
+    }
 
     /**
      * Closes the underlying {@link Scanner} to release resources.
@@ -37,7 +37,7 @@ public class Ui {
      */
     private void closeScanner() {
         sc.close();
-    };
+    }
 
     /**
      * Displays one or more messages, indented and wrapped between
@@ -92,7 +92,7 @@ public class Ui {
                 "-> mark <taskNumber>                       : Mark a task as done",
                 "-> unmark <taskNumber>                     : Mark a task as not done",
                 "-> bye                                     : Exit the program"));
-    };
+    }
 
     /**
      * Displays a numbered list of items with a pretext message.

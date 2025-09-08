@@ -17,7 +17,7 @@ import commands.Command;
 public class LogosTUI {
     private static TaskList taskList;
 
-    private static String LOCAL_STORAGE_FILE_PATH = "./data/tasks.txt";
+    private static final String LOCAL_STORAGE_FILE_PATH = "./data/tasks.txt";
     public static Storage storage;
 
     public static void main(String[] args) {

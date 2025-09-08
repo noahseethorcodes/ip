@@ -82,7 +82,7 @@ public class TaskList {
      * @return the newly created {@code Todo}
      * @throws IOException if an error occurs while saving to storage
      */
-    public Todo addTodo(String taskName) throws IOException{
+    public Todo addTodo(String taskName) throws IOException {
         Todo newTodo = new Todo(taskName);
         tasks.add(newTodo);
         saveToStorage();
