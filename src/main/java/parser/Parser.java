@@ -48,115 +48,253 @@ public class Parser {
         String commandKeyword = parts[0];
         String argument = parts.length > 1 ? parts[1] : null;
         CommandType commandType = CommandType.fromString(commandKeyword);
-        Command command = null;
-        switch (commandType) {
-            case BYE -> {
-                command = new ByeCommand();
-            }
-            case LIST -> {
-                command = new ListCommand();
-            }
-            case MARK -> {
-                if (argument != null) {
-                    try {
-                        int taskNumber = Integer.parseInt(argument);
-                        command = new MarkCommand(taskNumber);
-                    } catch (NumberFormatException e) {
-                        throw new InvalidCommandFormatException(commandType.getKeyword(), "mark <taskNumber>");
-                    }
-                } else {
-                    throw new InvalidCommandFormatException(commandType.getKeyword(), "mark <taskNumber>");
-                }
-            }
-            case UNMARK -> {
-                if (argument != null) {
-                    try {
-                        int taskNumber = Integer.parseInt(argument);
-                        command = new UnmarkCommand(taskNumber);
-                    } catch (NumberFormatException e) {
-                        throw new InvalidCommandFormatException(commandType.getKeyword(), "unmark <taskNumber>");
-                    }
-                } else {
-                    throw new InvalidCommandFormatException(commandType.getKeyword(), "unmark <taskNumber>");
-                }
-            }
-            case TODO -> {
-                command = new TodoCommand(argument);
-            }
-            case DEADLINE -> {
-                int byPos = argument.toLowerCase().indexOf("/by");
-                if (byPos < 0) {
-                    throw new InvalidCommandFormatException(
-                            commandType.getKeyword(),
-                            "deadline <desc> /by <yyyy-MM-dd HHmm>");
-                }
 
-                String description = argument.substring(0, byPos).trim();
-                String by = argument.substring(byPos + 3).trim(); // len("/by") = 3
+        return switch (commandType) {
+            case BYE     -> parseBye();
+            case LIST    -> parseList();
+            case TODO    -> parseTodo(argument);
+            case DEADLINE-> parseDeadline(argument);
+            case EVENT   -> parseEvent(argument);
+            case MARK    -> parseMark(argument);
+            case UNMARK  -> parseUnmark(argument);
+            case DELETE  -> parseDelete(argument);
+            case FIND    -> parseFind(argument);
+        };
+    }
 
-                LocalDateTime deadline;
-                try {
-                    deadline = LocalDateTime.parse(by, INPUT_FORMAT);
-                } catch (DateTimeParseException e) {
-                    throw new InvalidCommandFormatException(
-                            commandType.getKeyword(),
-                            "Date should be in yyyy-MM-dd HHmm format, e.g., 2019-12-02 1800");
-                }
+    // ── Per-command parsers ──────────────────────────────────────────────
+    /**
+     * Parses a {@code bye} command.
+     *
+     * @return a {@link ByeCommand} that signals program termination
+     */
+    private Command parseBye() {
+        return new ByeCommand();
+    }
 
-                if (description.isEmpty()) {
-                    throw new InvalidCommandFormatException(commandType.getKeyword(),
-                            "deadline <desc> /by <yyyy-MM-dd HHmm>");
-                }
-                command = new DeadlineCommand(description, deadline);
-            }
-            case EVENT -> {
-                int fromPos = argument.indexOf("/from");
-                int toPos = argument.indexOf("/to");
-                if (fromPos < 0 || toPos < 0 || toPos <= fromPos) {
-                    throw new InvalidCommandFormatException(commandType.getKeyword(),
-                            "event <desc> /from <start> /to <end>");
-                }
+    /**
+     * Parses a {@code list} command.
+     *
+     * @return a {@link ListCommand} that lists all tasks
+     */
+    private Command parseList() {
+        return new ListCommand();
+    }
 
-                String desc = argument.substring(0, fromPos).trim();
-                String from = argument.substring(fromPos + 5, toPos).trim(); // 5 = len("/from")
-                String to = argument.substring(toPos + 3).trim(); // 3 = len("/to")
+    /**
+     * Parses a {@code todo} command.
+     *
+     * @param arg the raw argument string containing the task description
+     * @return a {@link TodoCommand} encapsulating the new task
+     * @throws InvalidCommandFormatException if {@code arg} is null or blank
+     */
+    private Command parseTodo(String arg) throws InvalidCommandFormatException {
+        String desc = requireArg(arg, "todo <desc>");
+        return new TodoCommand(desc);
+    }
 
-                LocalDateTime startDateTime;
-                LocalDateTime endDateTime;
-                try {
-                    startDateTime = LocalDateTime.parse(from, INPUT_FORMAT);
-                    endDateTime = LocalDateTime.parse(to, INPUT_FORMAT);
-                } catch (DateTimeParseException e) {
-                    throw new InvalidCommandFormatException(
-                            commandType.getKeyword(),
-                            "Date should be in yyyy-MM-dd HHmm format, e.g., 2019-12-02 1800");
-                }
-
-                if (desc.isEmpty()) {
-                    throw new InvalidCommandFormatException(commandType.getKeyword(),
-                            "event <desc> /from <start> /to <end>");
-                }
-                command = new EventCommand(desc, startDateTime, endDateTime);
-            }
-            case DELETE -> {
-                if (argument != null) {
-                    try {
-                        int taskNumber = Integer.parseInt(argument);
-                        command = new DeleteCommand(taskNumber);
-                    } catch (NumberFormatException e) {
-                        throw new InvalidCommandFormatException(commandType.getKeyword(), "delete <taskNumber>");
-                    }
-                } else {
-                    throw new InvalidCommandFormatException(commandType.getKeyword(), "delete <taskNumber>");
-                }
-            }
-            case FIND -> {
-                command = new FindCommand(argument);
-            }
-            default -> {
-                throw new UnknownCommandException(commandType.getKeyword());
-            }
+    /**
+     * Parses a {@code deadline} command in the format:
+     * <pre>
+     *   deadline &lt;desc&gt; /by &lt;yyyy-MM-dd HHmm&gt;
+     * </pre>
+     *
+     * @param arg the raw argument string containing description and deadline
+     * @return a {@link DeadlineCommand} with parsed description and due date
+     * @throws InvalidCommandFormatException if required tokens are missing, empty,
+     *         or the datetime cannot be parsed
+     */
+    private Command parseDeadline(String arg) throws InvalidCommandFormatException {
+        String a = requireArg(arg, "deadline <desc> /by <yyyy-MM-dd HHmm>");
+        int byPos = getPositionOf(
+                a.toLowerCase(), 
+                "/by", 
+                "deadline <desc> /by <yyyy-MM-dd HHmm>");
+        String desc = a.substring(0, byPos).trim();
+        String when = a.substring(byPos + 3).trim(); // len("/by") = 3
+        if (desc.isEmpty() || when.isEmpty()) {
+            throw new InvalidCommandFormatException(
+                    "deadline", 
+                    "deadline <desc> /by <yyyy-MM-dd HHmm>");
         }
-        return command;
+        LocalDateTime dt = parseDateTime(when, "Date should be yyyy-MM-dd HHmm, e.g., 2019-12-02 1800");
+        return new DeadlineCommand(desc, dt);
+    }
+
+    /**
+     * Parses an {@code event} command in the format:
+     * <pre>
+     *   event &lt;desc&gt; /from &lt;yyyy-MM-dd HHmm&gt; /to &lt;yyyy-MM-dd HHmm&gt;
+     * </pre>
+     *
+     * @param arg the raw argument string containing description, start, and end times
+     * @return an {@link EventCommand} with parsed description and time interval
+     * @throws InvalidCommandFormatException if required tokens are missing, empty,
+     *         or the datetimes cannot be parsed
+     */
+    private Command parseEvent(String arg) throws InvalidCommandFormatException {
+        String a = requireArg(arg, "event <desc> /from <start> /to <end>");
+        String low = a.toLowerCase();
+        int fromPos = getPositionOf(low, "/from", "event <desc> /from <start> /to <end>");
+        int toPos   = getPositionOf(low, "/to",   "event <desc> /from <start> /to <end>");
+        if (toPos <= fromPos) {
+            throw new InvalidCommandFormatException(
+                    "event", 
+                    "event <desc> /from <start> /to <end>");
+        }
+
+        String desc = a.substring(0, fromPos).trim();
+        String from = a.substring(fromPos + 5, toPos).trim();  // "/from"
+        String to   = a.substring(toPos + 3).trim();           // "/to"
+        if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
+            throw new InvalidCommandFormatException(
+                    "event", 
+                    "event <desc> /from <start> /to <end>");
+        }
+
+        LocalDateTime start = parseDateTime(from, "Date should be yyyy-MM-dd HHmm, e.g., 2019-12-02 1800");
+        LocalDateTime end   = parseDateTime(to,   "Date should be yyyy-MM-dd HHmm, e.g., 2019-12-02 1800");
+        if (end.isBefore(start)) {
+            throw new InvalidCommandFormatException(
+                    "event", 
+                    "End time must not be before start time");
+        }
+        return new EventCommand(desc, start, end);
+    }
+
+    /**
+     * Parses a {@code mark} command.
+     *
+     * @param arg the raw argument string containing a 1-based task index
+     * @return a {@link MarkCommand} with the parsed index
+     * @throws InvalidCommandFormatException if {@code arg} is null, empty,
+     *         or not a positive integer
+     */
+    private Command parseMark(String arg) throws InvalidCommandFormatException {
+        int idx = parseIndex(arg, "mark <taskNumber>");
+        return new MarkCommand(idx);
+    }
+
+    /**
+     * Parses an {@code unmark} command.
+     *
+     * @param arg the raw argument string containing a 1-based task index
+     * @return an {@link UnmarkCommand} with the parsed index
+     * @throws InvalidCommandFormatException if {@code arg} is null, empty,
+     *         or not a positive integer
+     */
+    private Command parseUnmark(String arg) throws InvalidCommandFormatException {
+        int idx = parseIndex(arg, "unmark <taskNumber>");
+        return new UnmarkCommand(idx);
+    }
+
+    /**
+     * Parses a {@code delete} command.
+     *
+     * @param arg the raw argument string containing a 1-based task index
+     * @return a {@link DeleteCommand} with the parsed index
+     * @throws InvalidCommandFormatException if {@code arg} is null, empty,
+     *         or not a positive integer
+     */
+    private Command parseDelete(String arg) throws InvalidCommandFormatException {
+        int idx = parseIndex(arg, "delete <taskNumber>");
+        return new DeleteCommand(idx);
+    }
+
+    /**
+     * Parses a {@code find} command.
+     *
+     * @param arg the raw argument string containing a search keyword
+     * @return a {@link FindCommand} with the search query
+     * @throws InvalidCommandFormatException if {@code arg} is null or blank
+     */
+    private Command parseFind(String arg) throws InvalidCommandFormatException {
+        String q = requireArg(arg, "find <keyword>");
+        return new FindCommand(q);
+    }
+
+    // ── Shared helpers ────────────────────────────────────────────────────
+    /**
+     * Ensures that a required argument string is present and non-blank.
+     *
+     * @param arg   the raw argument string (may be null)
+     * @param usage the usage string to include in exception messages
+     * @return the trimmed argument
+     * @throws InvalidCommandFormatException if {@code arg} is null or blank
+     */
+    private static String requireArg(String arg, String usage) throws InvalidCommandFormatException {
+        if (arg == null || arg.trim().isEmpty()) {
+            throw new InvalidCommandFormatException(extractVerb(usage), usage);
+        }
+        return arg.trim();
+    }
+
+    /**
+     * Parses a task index argument.
+     *
+     * @param arg   the raw argument string
+     * @param usage the usage string to include in exception messages
+     * @return the parsed 1-based task index
+     * @throws InvalidCommandFormatException if {@code arg} is missing, not numeric,
+     *         or less than 1
+     */
+    private static int parseIndex(String arg, String usage) throws InvalidCommandFormatException {
+        String s = requireArg(arg, usage);
+        try {
+            int n = Integer.parseInt(s.trim());
+            if (n <= 0) throw new NumberFormatException();
+            return n;
+        } catch (NumberFormatException e) {
+            throw new InvalidCommandFormatException(extractVerb(usage), usage);
+        }
+    }
+
+    /**
+     * Finds the index of a required token in a command string.
+     *
+     * @param fullString     the lowercased input string to search
+     * @param searchString   the token to search for (e.g., {@code "/by"})
+     * @param commandFormat  the usage string to include in exception messages
+     * @return the index of {@code searchString} in {@code fullString}
+     * @throws InvalidCommandFormatException if {@code searchString} is not found
+     */
+    private static int getPositionOf(
+            String fullString, 
+            String searchString, 
+            String commandFormat) throws InvalidCommandFormatException {
+        int p = fullString.indexOf(searchString);
+        if (p < 0) throw new InvalidCommandFormatException(extractVerb(commandFormat), commandFormat);
+        return p;
+    }
+
+    /**
+     * Parses a datetime argument using the standard {@code yyyy-MM-dd HHmm} pattern.
+     *
+     * @param s     the raw datetime string
+     * @param error the error message to use in case of failure
+     * @return a parsed {@link LocalDateTime}
+     * @throws InvalidCommandFormatException if parsing fails
+     */
+    private static LocalDateTime parseDateTime(String s, String error) throws InvalidCommandFormatException {
+        try {
+            return LocalDateTime.parse(s, INPUT_FORMAT);
+        } catch (DateTimeParseException e) {
+            throw new InvalidCommandFormatException(extractVerb(error), error);
+        }
+    }
+
+    /**
+     * Extracts the "verb" (first token) from a string.
+     * <p>
+     * For example, given {@code "deadline <desc> /by <yyyy-MM-dd HHmm>"}, this
+     * method returns {@code "deadline"}. If the string contains no spaces,
+     * the entire string is returned.
+     *
+     * @param fullString the usage string (e.g., {@code "mark <taskNumber>"})
+     * @return the first word of the string, or the whole string if no spaces exist
+     */
+    private static String extractVerb(String fullString) {
+        int spacePosition = fullString.indexOf(' ');
+        return spacePosition > 0 ? fullString.substring(0, spacePosition) : fullString;
     }
 }
