@@ -112,6 +112,29 @@ public class Ui {
         return respond(lines.toArray(new String[0]));
     }
 
+    // New method: uses original indexes for labels
+    public String showTasksWithOriginalIndexes(
+            List<Integer> indexes,
+            List<String> tasks,
+            String pretext
+    ) {
+        if (indexes.size() != tasks.size()) {
+            throw new IllegalArgumentException("indexes and items must be the same length");
+        }
+        List<String> lines = new ArrayList<>();
+        lines.add(pretext);
+
+        for (int i = 0; i < tasks.size(); i++) {
+            int taskIndex = indexes.get(i);
+            if (taskIndex < 0) {
+                throw new IllegalArgumentException("index must be > 0: " + taskIndex);
+            }
+            // Display as 1-based index to users
+            lines.add((taskIndex + 1) + ". " + tasks.get(i));
+        }
+        return respond(lines.toArray(new String[0]));
+    }
+
     /**
      * Displays a goodbye message and closes the input scanner.
      */

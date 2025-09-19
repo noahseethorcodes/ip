@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import errors.InvalidIndexException;
 
@@ -188,10 +189,18 @@ public class TaskList {
         return selectedTask;
     }
 
-    public List<String> find(String searchWord) {
-        return tasks.stream()
-                .filter(task -> task.getDescription().toLowerCase().contains(searchWord.toLowerCase()))
+    public List<String> filterByIndexes(List<Integer> indexes) {
+        return indexes.stream()
+                .map(tasks::get)
                 .map(Task::getAsListItem)
+                .toList();
+    }
+
+    public List<Integer> findIndexes(String searchWord) {
+        final String q = searchWord.toLowerCase();
+        return IntStream.range(0, tasks.size())
+                .filter(i -> tasks.get(i).getDescription().toLowerCase().contains(q))
+                .boxed()
                 .toList();
     }
 
