@@ -3,6 +3,7 @@ package gui;
 import java.io.IOException;
 import java.util.Collections;
 
+import commands.CommandType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -46,15 +47,45 @@ public class DialogBox extends HBox {
         Collections.reverse(tmp);
         getChildren().setAll(tmp);
         setAlignment(Pos.TOP_LEFT);
+        dialog.getStyleClass().add("reply-label");
+    }
+
+     private void changeDialogStyle(CommandType commandType) {
+        if (commandType == null) {
+            return;
+        }
+
+        switch(commandType) {
+        // Add Commands
+        case TODO: 
+            // Fallthrough
+        case DEADLINE:
+            // Fallthrough
+        case EVENT:
+            dialog.getStyleClass().add("add-label");
+            break;
+        // Mark/Unmark Commands
+        case MARK:
+            // Fallthrough
+        case UNMARK:
+            dialog.getStyleClass().add("marked-label");
+            break;
+        case DELETE:
+            dialog.getStyleClass().add("delete-label");
+            break;
+        default:
+            // Do nothing
+        }
     }
 
     public static DialogBox getUserDialog(String text, Image img) {
         return new DialogBox(text, img);
     }
 
-    public static DialogBox getDukeDialog(String text, Image img) {
+    public static DialogBox getDukeDialog(String text, Image img, CommandType commandType) {
         var db = new DialogBox(text, img);
         db.flip();
+        db.changeDialogStyle(commandType);
         return db;
     }
 }

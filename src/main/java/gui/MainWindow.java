@@ -7,6 +7,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import commands.CommandType;
 import javafx.application.Platform;
 
 import logos.Logos;
@@ -41,7 +42,7 @@ public class MainWindow extends AnchorPane {
     @FXML
     public void welcome() {
         dialogContainer.getChildren().add(
-                DialogBox.getDukeDialog(logos.getWelcome(), logosImage)
+                DialogBox.getDukeDialog(logos.getWelcome(), logosImage, null)
         );
     }
 
@@ -53,6 +54,7 @@ public class MainWindow extends AnchorPane {
     private void handleUserInput() {
         String input = userInput.getText();
         String response = logos.getResponse(input);
+        CommandType commmandType = logos.getCurrentCommandType();
 
         // Exit chat if logos is no longer set as active (i.e. the bye command was given)
         if (!logos.isActive()) {
@@ -60,7 +62,7 @@ public class MainWindow extends AnchorPane {
         }
         dialogContainer.getChildren().addAll(
                 DialogBox.getUserDialog(input, userImage),
-                DialogBox.getDukeDialog(response, logosImage)
+                DialogBox.getDukeDialog(response, logosImage, commmandType)
         );
         userInput.clear();
     }
