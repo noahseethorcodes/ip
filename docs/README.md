@@ -163,7 +163,7 @@ bye
 
 ---
 
-## 💡 Tips
+## Tips
 
 * Date/time format is strict: `yyyy-MM-dd HHmm`. Example: `2025-10-05 2359`.
 * Use `list` often to check your current tasks.
@@ -171,7 +171,7 @@ bye
 
 ---
 
-## 📸 Product Snapshot
+## Product Snapshot
 
 Here’s an example task list after adding and sorting tasks:
 
@@ -186,13 +186,13 @@ Here’s an example task list after adding and sorting tasks:
 
 ---
 
-## 🛠 Troubleshooting
+## Troubleshooting
 
 * **Invalid command:** Logos will show you the correct format. Example:
 * **Wrong date format:** Make sure to use `yyyy-MM-dd HHmm`.
 
 ---
 
-## 👨‍💻 About
+## About
 
 This chatbot is developed as part of **CS2103T: Software Engineering**.
