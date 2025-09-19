@@ -51,15 +51,15 @@ public class Logos {
                 return(command.execute(taskList, ui));
             }
         } catch (UnknownCommandException e) {
-            return(ui.respond("Error encountered: " + e.getMessage()));
+            return(ui.respond(e.getMessage()));
         } catch (InvalidCommandFormatException e) {
-            return(ui.respond("Error encountered: " + e.getMessage()));
+            return(ui.respond(e.getMessage()));
         } catch (InvalidIndexException e) {
-            return(ui.respond("Error encountered: " + e.getMessage()));
+            return(ui.respond(e.getMessage()));
         } catch (IOException e) {
             return(ui.respond("Error handling local storage: " + e.getMessage()));
         } catch (LogosException e) {
-            return(ui.respond("Error encountered: " + e.getMessage()));
+            return(ui.respond(e.getMessage()));
         } catch (Exception e) {
             return(ui.respond("Error encountered: " + e.getMessage()));
         }
