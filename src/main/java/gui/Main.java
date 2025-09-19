@@ -25,7 +25,7 @@ public class Main extends Application {
             Scene scene = new Scene(ap);
             stage.setScene(scene);
             stage.setMinHeight(450);
-            stage.setMinWidth(600);
+            stage.setMinWidth(800);
 
             fxmlLoader.<MainWindow>getController().setLogos(logos);  // inject the Logos instance
             fxmlLoader.<MainWindow>getController().welcome();

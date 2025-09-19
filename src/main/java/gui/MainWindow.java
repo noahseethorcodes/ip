@@ -59,6 +59,8 @@ public class MainWindow extends AnchorPane {
         // Exit chat if logos is no longer set as active (i.e. the bye command was given)
         if (!logos.isActive()) {
             Platform.exit();
+            System.exit(0); // ensures Gradle sees a success code
+            return;
         }
         dialogContainer.getChildren().addAll(
                 DialogBox.getUserDialog(input, userImage),

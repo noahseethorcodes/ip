@@ -14,6 +14,6 @@ public class ListCommand implements Command {
         if (list.isEmpty()) {
             return(ui.respond("There are no tasks in your task list currently."));
         }
-        return(ui.showList(list, "Here's your current tasks, in order of when they were added:"));
+        return(ui.showList(list, "Here's your current tasks:"));
     }
 }
