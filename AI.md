@@ -20,3 +20,12 @@ This file documents my use AI tools during the development of Logos, as part of 
 ### Observations
 - **What worked well:** The AI provided a consistent design system with reasoning (contrast, accessibility, maintainability). It also gave ready-to-use CSS code that mapped cleanly to our existing FXML structure.  
 - **Time saved:** Significant — drafting a full palette and rewriting the CSS manually could have taken hours; with AI help, I got a solid proposal within minutes and only needed light adjustments.  
+
+gotcha — here’s a short, paste-ready addendum you can drop into **AI.md**:
+
+### AI-caused issues (and quick fixes)
+
+* **Browser CSS leaked into JavaFX CSS.** AI suggested `var(...)`, `%` radii (`50%`), and `-fx-font` shorthands → JavaFX parser warnings and styling glitches.
+  **Fix:** Replace with JavaFX-friendly syntax: inline pixel radii (`10px`, `16px`), use explicit font props (`-fx-font-family/size/weight`), and inline `-fx-effect: dropshadow(...)`.
+
+**Outcome:** Warnings cleared, styles render as intended with explicit JavaFX-compatible values.

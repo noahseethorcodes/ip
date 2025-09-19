@@ -6,11 +6,15 @@
         rgba(0, 166, 255, 0.18)
     );
     -fx-text-fill: -color-text;
-    -fx-background-radius: 16px 16px 8px 16px;   /* user bubble tail right */
+
+    /* keep explicit corner radii (OK in JavaFX) */
+    -fx-background-radius: 16px 16px 8px 16px;
     -fx-border-color: -color-border;
     -fx-border-width: 1px;
     -fx-border-radius: 16px 16px 8px 16px;
-    -fx-effect: var(-shadow-xl);
+
+    /* inline effect (no var()) */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 18, 0.2, 0, 6);
 
     -fx-font-family: "Monospaced";
     -fx-font-size: 13px;
@@ -23,25 +27,24 @@
         rgba(17, 24, 39, 0.85),
         rgba(17, 24, 39, 0.65)
     );
-    -fx-background-radius: 16px 16px 16px 8px;   /* tail left */
+    -fx-background-radius: 16px 16px 16px 8px;
     -fx-border-radius: 16px 16px 16px 8px;
     -fx-border-color: -color-border;
 }
 
-/* Semantic statuses (used when you append state classes) */
-.add-label    { -fx-background-color: rgba(52, 211, 153, 0.25);  } /* success */
-.marked-label { -fx-background-color: rgba(52, 211, 153, 0.18);  }
+/* Semantic statuses */
+.add-label    { -fx-background-color: rgba(52, 211, 153, 0.25); }
+.marked-label { -fx-background-color: rgba(52, 211, 153, 0.18); }
 .delete-label { -fx-background-color: rgba(248, 113, 113, 0.20); }
-.warn-label   { -fx-background-color: rgba(251, 191, 36, 0.22);  }
+.warn-label   { -fx-background-color: rgba(251, 191, 36, 0.22); }
 
 /* Avatar */
 #displayPicture {
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 14, 0.25, 0, 4);
-    -fx-scale-x: 1;
-    -fx-scale-y: 1;
-    -fx-rotate: 0;
-    -fx-background-radius: 50%;
+
+    /* JavaFX doesn't support % radii. Use a huge px to simulate a circle. */
+    -fx-background-radius: 9999;   /* was 50% */
     -fx-border-color: -color-border;
     -fx-border-width: 1px;
-    -fx-border-radius: 50%;
+    -fx-border-radius: 9999;       /* was 50% */
 }

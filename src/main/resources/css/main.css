@@ -1,20 +1,16 @@
 .root {
-    /* Design tokens (looked-up colors) */
-    -color-bg:            #0b1020;               /* page background behind image */
-    -color-surface:       rgba(17, 24, 39, 0.72);/* glass card over bg (#111827) */
+    /* Looked-up tokens (OK in JavaFX) */
+    -color-bg:            #0b1020;
+    -color-surface:       rgba(17, 24, 39, 0.72);
     -color-surface-weak:  rgba(17, 24, 39, 0.44);
-    -color-border:        rgba(148, 163, 184, 0.25); /* slate-300 @ 25% */
-    -color-text:          #e6f0ff;               /* near-white */
-    -color-text-muted:    #a8b3c7;               /* slate-300 */
-    -color-accent:        #00d1b2;               /* teal (primary) */
-    -color-accent-strong: #00b49a;               /* hover/pressed */
-    -color-success:       #34d399;               /* green-400 */
-    -color-warning:       #fbbf24;               /* amber-400 */
-    -color-danger:        #f87171;               /* red-400 */
-
-    -radius:              16px;
-    -radius-sm:           10px;
-    -shadow-xl:           dropshadow(gaussian, rgba(0,0,0,0.45), 18, 0.2, 0, 6);
+    -color-border:        rgba(148, 163, 184, 0.25);
+    -color-text:          #e6f0ff;
+    -color-text-muted:    #a8b3c7;
+    -color-accent:        #00d1b2;
+    -color-accent-strong: #00b49a;
+    -color-success:       #34d399;
+    -color-warning:       #fbbf24;
+    -color-danger:        #f87171;
 
     /* Background */
     -fx-background-color: -color-bg;
@@ -27,23 +23,33 @@
 .text-field {
     -fx-background-color: -color-surface;
     -fx-background-insets: 0;
-    -fx-background-radius: var(-radius-sm);
+    -fx-background-radius: 10px;      /* was var(10px) */
     -fx-border-color: -color-border;
-    -fx-border-radius: var(-radius-sm);
+    -fx-border-radius: 10px;          /* was var(10px) */
     -fx-text-fill: -color-text;
     -fx-prompt-text-fill: -color-text-muted;
-    -fx-font: 16px "Inter", "Arial";
-    -fx-effect: var(-shadow-xl);
+
+    /* split out font shorthand */
+    -fx-font-family: "Inter", "Arial";
+    -fx-font-size: 16px;
+
+    /* inline the effect (JavaFX doesn't support var()) */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 18, 0.2, 0, 6);
 }
 
 /* Button */
 .button {
     -fx-background-color: -color-accent;
     -fx-text-fill: #071017;
-    -fx-font: 600 15px "Inter", "Arial";
-    -fx-background-radius: var(-radius-sm);
+
+    -fx-font-family: "Inter", "Arial";
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;                    /* or 'bold' */
+
+    -fx-background-radius: 10px;       /* was var(10px) */
     -fx-padding: 8 16 8 16;
-    -fx-effect: var(-shadow-xl);
+
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 18, 0.2, 0, 6);
 }
 .button:hover {
     -fx-background-color: -color-accent-strong;
@@ -79,11 +85,11 @@
     -fx-pref-width: 0;
 }
 
-/* Chat container background(s) if you have panes/cards */
+/* Chat container backgrounds */
 .chat-panel, .input-panel {
     -fx-background-color: -color-surface;
-    -fx-background-radius: var(-radius);
+    -fx-background-radius: 16px;          /* was var(-radius) */
     -fx-border-color: -color-border;
-    -fx-border-radius: var(-radius);
-    -fx-effect: var(-shadow-xl);
+    -fx-border-radius: 16px;              /* was var(-radius) */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 18, 0.2, 0, 6);
 }
