@@ -27,9 +27,9 @@ public class Todo extends Task {
         // Parse Storage Line
         String[] parts = storageLine.split(" \\| ");
 
-        boolean taskIsDone;
+        boolean isMarkedDone;
         try {
-            taskIsDone = Integer.parseInt(parts[1]) == 1;
+            isMarkedDone = Integer.parseInt(parts[1]) == 1;
         } catch (NumberFormatException e) {
             System.out.println("INVALID STORAGE FORMAT");
             return null;
@@ -39,7 +39,7 @@ public class Todo extends Task {
 
         // Create Todo Object
         Todo todo = new Todo(description);
-        if (taskIsDone) {
+        if (isMarkedDone) {
             todo.markAsDone();
         }
 

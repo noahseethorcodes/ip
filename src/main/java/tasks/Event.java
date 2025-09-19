@@ -54,9 +54,9 @@ public class Event extends Task {
         // Parse Storage Line
         String[] parts = storageLine.split(" \\| ");
 
-        boolean taskIsDone;
+        boolean isMarkedDone;
         try {
-            taskIsDone = Integer.parseInt(parts[1]) == 1;
+            isMarkedDone = Integer.parseInt(parts[1]) == 1;
         } catch (NumberFormatException e) {
             System.out.println("INVALID STORAGE FORMAT");
             return null;
@@ -68,7 +68,7 @@ public class Event extends Task {
 
         // Create Event Object
         Event event = new Event(description, startDateTime, endDateTime);
-        if (taskIsDone) {
+        if (isMarkedDone) {
             event.markAsDone();
         }
 
