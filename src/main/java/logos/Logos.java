@@ -60,6 +60,8 @@ public class Logos {
             return(ui.respond("Error handling local storage: " + e.getMessage()));
         } catch (LogosException e) {
             return(ui.respond(e.getMessage()));
+        } catch (Exception e) {
+            return(ui.respond(e.getMessage()));
         }
         return "ERROR: LOGOS DOESN'T KNOW HOW TO RESPOND";
     }

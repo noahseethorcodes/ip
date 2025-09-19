@@ -112,7 +112,21 @@ public class Ui {
         return respond(lines.toArray(new String[0]));
     }
 
-    // New method: uses original indexes for labels
+    /**
+     * Displays a list of tasks with their original indexes preserved.
+     * <p>
+     * Each entry is printed with its original 1-based position in the master task list,
+     * rather than being renumbered sequentially. This ensures consistency with commands
+     * that operate by index (e.g., delete or mark).
+     * </p>
+     *
+     * @param indexes a list of 0-based indexes corresponding to the given tasks
+     * @param tasks   a list of task display strings; must be the same size as {@code indexes}
+     * @param pretext a message to display above the list of tasks
+     * @return a formatted string containing the pretext and numbered task list
+     * @throws IllegalArgumentException if {@code indexes} and {@code tasks} differ in size,
+     *                                  or if any index is negative
+     */
     public String showTasksWithOriginalIndexes(
             List<Integer> indexes,
             List<String> tasks,

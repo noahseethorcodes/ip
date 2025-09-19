@@ -189,6 +189,17 @@ public class TaskList {
         return selectedTask;
     }
 
+    /**
+     * Returns a list of task display strings corresponding to the given indexes.
+     * <p>
+     * Each index refers to a position in the internal {@code tasks} list, and
+     * the resulting strings are obtained by calling {@link Task#getAsListItem()}.
+     * </p>
+     *
+     * @param indexes the list of 0-based indexes pointing to tasks in the task list
+     * @return a list of task representations in the same order as the given indexes
+     * @throws IndexOutOfBoundsException if any index is invalid for the current task list
+     */
     public List<String> filterByIndexes(List<Integer> indexes) {
         return indexes.stream()
                 .map(tasks::get)
@@ -196,6 +207,17 @@ public class TaskList {
                 .toList();
     }
 
+    /**
+     * Finds the indexes of tasks whose descriptions contain the given search word.
+     * <p>
+     * The search is case-insensitive. Returned indexes are 0-based and refer to the
+     * positions of matching tasks in the underlying {@code tasks} list.
+     * </p>
+     *
+     * @param searchWord the keyword to search for within each task's description
+     * @return a list of 0-based indexes of tasks whose descriptions contain the search word,
+     *         or an empty list if no matches are found
+     */
     public List<Integer> findIndexes(String searchWord) {
         final String q = searchWord.toLowerCase();
         return IntStream.range(0, tasks.size())
