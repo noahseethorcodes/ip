@@ -13,6 +13,7 @@ import errors.InvalidIndexException;
 import errors.LogosException;
 import commands.ByeCommand;
 import commands.Command;
+import commands.CommandType;
 
 public class Logos {
     private static String LOCAL_STORAGE_FILE_PATH = "./data/tasks.txt";
@@ -61,6 +62,10 @@ public class Logos {
             return(ui.respond(e.getMessage()));
         }
         return "ERROR: LOGOS DOESN'T KNOW HOW TO RESPOND";
+    }
+
+    public CommandType getCurrentCommandType() {
+        return this.parser.getCurrentCommandType();
     }
 
     public String getWelcome() {

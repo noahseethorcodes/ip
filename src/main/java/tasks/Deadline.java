@@ -43,9 +43,9 @@ public class Deadline extends Task {
         // Parse Storage Line
         String[] parts = storageLine.split(" \\| ");
 
-        boolean taskIsDone;
+        boolean isMarkedDone;
         try {
-            taskIsDone = Integer.parseInt(parts[1]) == 1;
+            isMarkedDone = Integer.parseInt(parts[1]) == 1;
         } catch (NumberFormatException e) {
             System.out.println("INVALID STORAGE FORMAT");
             return null;
@@ -56,7 +56,7 @@ public class Deadline extends Task {
 
         // Create Deadline Object
         Deadline deadline = new Deadline(description, by);
-        if (taskIsDone) {
+        if (isMarkedDone) {
             deadline.markAsDone();
         }
 

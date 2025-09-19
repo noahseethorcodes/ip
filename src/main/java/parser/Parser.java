@@ -28,6 +28,7 @@ import errors.UnknownCommandException;
  */
 public class Parser {
     private static final DateTimeFormatter INPUT_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+    private CommandType currentCommandType;
 
      /**
       * Parses a single line of user input and returns the corresponding {@link Command}.
@@ -49,6 +50,7 @@ public class Parser {
         String commandKeyword = parts[0];
         String argument = parts.length > 1 ? parts[1] : null;
         CommandType commandType = CommandType.fromString(commandKeyword);
+        this.currentCommandType = commandType;
 
         return switch (commandType) {
             case BYE     -> parseBye();
@@ -62,6 +64,10 @@ public class Parser {
             case FIND    -> parseFind(argument);
             case SORT    -> parseSort();
         };
+    }
+
+    public CommandType getCurrentCommandType() {
+        return this.currentCommandType;
     }
 
     // ── Per-command parsers ──────────────────────────────────────────────
