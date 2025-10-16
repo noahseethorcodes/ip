@@ -40,8 +40,8 @@ public class LogosTUI {
         ui.showWelcome(logo, "Logos");
 
         // Input and Response
-        Boolean chatActive = true;
-        while (chatActive) {
+        boolean isActive = true;
+        while (isActive) {
             String userInput = ui.readLine();
             try {
                 Command command = parser.parse(userInput);
@@ -49,7 +49,7 @@ public class LogosTUI {
                     command.execute(taskList, ui);
                 }
                 if (command instanceof ByeCommand) {
-                    chatActive = false;
+                    isActive = false;
                 }
             } catch (UnknownCommandException e) {
                 ui.respond(e.getMessage());

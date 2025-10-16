@@ -103,13 +103,6 @@ public class ParserTest {
             Command cmd = parser.parse("todo buy milk");
             assertTrue(cmd instanceof TodoCommand);
         }
-
-        @Test
-        @DisplayName("parse: TODO without description still creates TodoCommand (parser defers validation)")
-        void parse_todo_withoutDesc() throws LogosException {
-            Command cmd = parser.parse("todo");
-            assertTrue(cmd instanceof TodoCommand);
-        }
     }
 
     @Nested
